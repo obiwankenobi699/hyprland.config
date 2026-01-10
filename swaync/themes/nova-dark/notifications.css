@@ -5,103 +5,152 @@
 @define-color urgent          @color2;
 
 * {
-
-  /*background-alt:        @color1;      Buttons background */
-  /*selected:              @color2;      Button selected */
-  /*hover:                 @color5;      Hover button */
-  /*urgent:                @color6;      Urgency critical */
-  /*text-selected:         @background; */
-
-  color: @text;
-
   all: unset;
+  color: @text;
   font-size: 14px;
   font-family: "JetBrainsMono Nerd Font";
   transition: 200ms;
-
 }
+
+/* ───────────────────────────────────────────── */
+/* NOTIFICATION POPUPS (TOASTS)                  */
+/* ───────────────────────────────────────────── */
 
 .notification-row {
   outline: none;
   margin: 0;
-  padding: 0px;
+  padding: 0;
 }
 
-.floating-notifications.background .notification-row .notification-background {
-  background: alpha(@background, .55);
-  box-shadow: 0 0 8px 0 rgba(0,0,0,.6);
-  border: 1px solid @selected;
+/* POPUP BACKGROUND — CATPPUCCIN PURPLE GLASS */
+.floating-notifications.background
+.notification-row
+.notification-background {
+  background: rgba(120, 86, 160, 0.55); /* glass purple */
+  backdrop-filter: blur(6px);           /* minimal blur */
+  box-shadow: 0 0 14px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 24px;
   margin: 16px;
   padding: 0;
 }
 
-.floating-notifications.background .notification-row .notification-background .notification {
-  padding: 6px;
-  border-radius: 12px;
+/* INNER CONTAINER */
+.floating-notifications.background
+.notification-row
+.notification-background
+.notification {
+  padding: 8px;
+  border-radius: 14px;
 }
 
-.floating-notifications.background .notification-row .notification-background .notification.critical {
+/* CRITICAL (BATTERY, SHUTDOWN, ETC.) */
+.floating-notifications.background
+.notification-row
+.notification-background
+.notification.critical {
   border: 2px solid @urgent;
 }
 
-.floating-notifications.background .notification-row .notification-background .notification .notification-content {
+/* CONTENT */
+.floating-notifications.background
+.notification-row
+.notification-background
+.notification
+.notification-content {
   margin: 14px;
 }
 
-.floating-notifications.background .notification-row .notification-background .notification > *:last-child > * {
+/* ACTION BUTTON AREA */
+.floating-notifications.background
+.notification-row
+.notification-background
+.notification
+> *:last-child > * {
   min-height: 3.4em;
 }
 
-.floating-notifications.background .notification-row .notification-background .notification > *:last-child > * .notification-action {
+/* ACTION BUTTONS */
+.floating-notifications.background
+.notification-row
+.notification-background
+.notification
+> *:last-child > *
+.notification-action {
   border-radius: 8px;
-  background-color: @background-alt ;
+  background-color: rgba(255,255,255,0.10);
   margin: 6px;
   border: 1px solid transparent;
 }
 
-.floating-notifications.background .notification-row .notification-background .notification > *:last-child > * .notification-action:hover {
+.floating-notifications.background
+.notification-row
+.notification-background
+.notification
+> *:last-child > *
+.notification-action:hover {
   background-color: @hover;
   border: 1px solid @selected;
 }
 
-.floating-notifications.background .notification-row .notification-background .notification > *:last-child > * .notification-action:active {
+.floating-notifications.background
+.notification-row
+.notification-background
+.notification
+> *:last-child > *
+.notification-action:active {
   background-color: @selected;
-  color: @background;
+  color: #000000;
 }
 
+/* APP ICON */
 .image {
-  margin: 10px 20px 10px 0px;
+  min-width: 48px;
+  min-height: 48px;
+  margin: 10px 20px 10px 0;
 }
 
+/* TEXT */
 .summary {
   font-weight: 800;
   font-size: 1rem;
 }
 
 .body {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
 }
 
-.floating-notifications.background .notification-row .notification-background .close-button {
+/* CLOSE BUTTON */
+.floating-notifications.background
+.notification-row
+.notification-background
+.close-button {
   margin: 6px;
-  padding: 2px;
+  padding: 4px;
   border-radius: 6px;
   background-color: transparent;
   border: 1px solid transparent;
 }
 
-.floating-notifications.background .notification-row .notification-background .close-button:hover {
-  background-color: @selected;
+.floating-notifications.background
+.notification-row
+.notification-background
+.close-button:hover {
+  background-color: rgba(255,255,255,0.15);
 }
 
-.floating-notifications.background .notification-row .notification-background .close-button:active {
+.floating-notifications.background
+.notification-row
+.notification-background
+.close-button:active {
   background-color: @selected;
-  color: @background;
+  color: #000000;
 }
 
+/* PROGRESS BAR */
 .notification.critical progress {
-  background-color: @selected;
+  background-color: @urgent;
 }
 
 .notification.low progress,
@@ -109,3 +158,18 @@
   background-color: @selected;
 }
 
+/* ───────────────────────────────────────────── */
+/* FIX HISTORY STACKING (CONTROL CENTER)         */
+/* ───────────────────────────────────────────── */
+
+.control-center
+.notification-row
+.notification-background {
+  margin-bottom: 14px;
+}
+
+.control-center
+.notification-row
+.notification {
+  min-height: 72px;
+}
