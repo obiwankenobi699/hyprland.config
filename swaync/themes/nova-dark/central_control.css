@@ -5,8 +5,7 @@
 @define-color urgent          @color2;
 
 * {
-  color:            @text;
-
+  color:@text;
   all: unset;
   font-size: 14px;
   font-family: "JetBrains Mono Nerd Font 10";
@@ -181,7 +180,7 @@ progressbar {
 
   /* Buttons menu */
 .widget-buttons-grid {
-  font-size: x-large;
+  font-size: 28px;
   padding: 6px 2px;
   margin: 6px;
   border-radius: 12px;
@@ -254,4 +253,32 @@ picture.mpris-background {
   padding: 4px;
   margin: 6px;
   border-radius: 6px;
+}
+.control-center image {
+    min-width: 32px;
+    min-height: 32px;
+}
+/* ================= NORMALIZE BUTTON ICON SIZES ================= */
+
+/* Buttons container */
+.control-center .widget-buttons-grid button {
+    min-width: 20px;
+    min-height: 20px;
+    padding: 0;
+    margin: 0;
+}
+
+/* Actual icon glyph */
+.control-center .widget-buttons-grid button label {
+    font-size: 15px;        /* ONE size for all */
+    line-height: 15px;      /* CRITICAL: fixes visual mismatch */
+    font-family: "JetBrainsMono Nerd Font";
+    font-weight: normal;
+}
+
+/* Center icon perfectly */
+.control-center .widget-buttons-grid button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
