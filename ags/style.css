@@ -1,0 +1,26 @@
+* {
+  all: unset;
+  font-family: JetBrainsMono Nerd Font;
+}
+
+.dashboard {
+  padding: 40px;
+}
+
+.card {
+  background: rgba(20, 20, 20, 0.9);
+  border-radius: 16px;
+  padding: 20px;
+  min-width: 280px;
+  color: #cdd6f4;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.clock-time {
+  font-size: 48px;
+  font-weight: bold;
+}
