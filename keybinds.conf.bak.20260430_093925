@@ -1,3 +1,4 @@
+
 # ─── MODIFIER KEY ──────────────────────────────
 $mainMod = SUPER
 
@@ -24,29 +25,30 @@ bind = $mainMod, P, togglefloating
 bind = $mainMod, Return, exec, $terminal
 bind = $mainMod, M, exit
 bind = $mainMod, Space, togglefloating
-
+bind = $mainMod,N, exec, ~/.config/waybar/scripts/wifi_menu.sh
 # Hold SUPER + Left mouse button = move window
 bindm = SUPER, mouse:272, movewindow
+
 # Hold SUPER + Right mouse button = resize window
 bindm = SUPER, mouse:273, resizewindow
 
-# ─── WINDOW FOCUS ──────────────────────────────
+# ─── WINDOW FOCUS WITH ARROW KEYS ──────────────────────────────
 bind = $mainMod, left, movefocus, l
 bind = $mainMod, right, movefocus, r
 bind = $mainMod, up, movefocus, u
 bind = $mainMod, down, movefocus, d
 
-# ─── WINDOW MOVEMENT ───────────────────────────
+# ─── WINDOW MOVEMENT (SHIFT + MOD) ─────────────
 bind = $mainMod SHIFT, H, movewindow, l
 bind = $mainMod SHIFT, L, movewindow, r
 bind = $mainMod SHIFT, K, movewindow, u
 bind = $mainMod SHIFT, J, movewindow, d
 
-# ─── RESIZE TILED WINDOWS (hold to repeat) ─────
-binde = $mainMod CTRL, H, resizeactive, -40 0
-binde = $mainMod CTRL, L, resizeactive, 40 0
-binde = $mainMod CTRL, K, resizeactive, 0 -40
-binde = $mainMod CTRL, J, resizeactive, 0 40
+# ─── RESIZE WINDOWS (CTRL + MOD) ───────────────
+bind = $mainMod CTRL, H, resizeactive, -40 0
+bind = $mainMod CTRL, L, resizeactive, 40 0
+bind = $mainMod CTRL, K, resizeactive, 0 -40
+bind = $mainMod CTRL, J, resizeactive, 0 40
 
 # ─── WORKSPACES ────────────────────────────────
 bind = $mainMod, 1, workspace, 1
@@ -60,7 +62,7 @@ bind = $mainMod, 8, workspace, 8
 bind = $mainMod, 9, workspace, 9
 bind = $mainMod, 0, workspace, 10
 
-# ─── MOVE WINDOW TO WORKSPACE ──────────────────
+# Move active window to workspace
 bind = $mainMod SHIFT, 1, movetoworkspace, 1
 bind = $mainMod SHIFT, 2, movetoworkspace, 2
 bind = $mainMod SHIFT, 3, movetoworkspace, 3
@@ -83,14 +85,17 @@ bindel = , XF86MonBrightnessDown, exec, brightnessctl set 5%-
 bind = $mainMod SHIFT, S, exec, grimblast copy area
 bind = $mainMod CTRL, S, exec, grimblast save screen
 
-# ─── DISPLAY SETTINGS ──────────────────────────
+# ─── DISPLAY SETTINGS (EXAMPLE) ────────────────
 bind = $mainMod, O, exec, wlr-randr
 
-# ─── SYSTEM ────────────────────────────────────
+# ─── MISCELLANEOUS ─────────────────────────────
+bind = $mainMod, R, exec, hyprctl reload
 bind = $mainMod, L, exec, swaylock
 bind = $mainMod SHIFT, E, exit
 
-# ─── DASHBOARD / EXTRAS ────────────────────────
+# ─── TOGGLE EWW/DASHBOARD ──────────────────────
 bind = $mainMod, V, exec, eww open dashboard
+
 bind = $mainMod, C, exec, kitty --class cheatsheet -e nvim +HyprCheat
 bind = SUPER, D, exec, ags toggle dashboard
+
