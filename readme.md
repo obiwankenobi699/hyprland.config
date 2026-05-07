@@ -1,1275 +1,1144 @@
-# Hyprland Dotfiles Documentation
+# Hyprland Dotfiles Configuration
+
+A clean, modular Wayland desktop environment built on Hyprland with unified Gruvbox theming and centralized configuration management.
 
 ## Table of Contents
 
-1. [System Overview](#system-overview)
-2. [Directory Structure](#directory-structure)
-3. [Core Components](#core-components)
-4. [Application Configurations](#application-configurations)
-5. [Execution Flow](#execution-flow)
-6. [Configuration Management](#configuration-management)
-7. [Installation Guide](#installation-guide)
-8. [Troubleshooting](#troubleshooting)
+1. [Overview](#overview)
+2. [Recent Changes](#recent-changes)
+3. [Directory Structure](#directory-structure)
+4. [System Architecture](#system-architecture)
+5. [Configuration Components](#configuration-components)
+6. [Installation](#installation)
+7. [Theme System](#theme-system)
+8. [Keybindings](#keybindings)
+9. [Troubleshooting](#troubleshooting)
+10. [Maintenance](#maintenance)
 
 ---
 
-## System Overview
+## Overview
 
-### What is This Setup
+### System Specifications
 
-This is a complete Wayland-based desktop environment configuration centered around Hyprland, a dynamic tiling compositor. The setup includes window management, status bars, notifications, application launchers, and terminal configurations, all managed through a unified Git repository.
-
-### Architecture Model
-
-```
-User Login
-    |
-    v
-Display Manager (ly-dm)
-    |
-    v
-Hyprland Compositor
-    |
-    +---> Reads hyprland.conf
-    |
-    +---> Sources modular configs
-    |     (variables, monitors, keybinds, rules, autostart)
-    |
-    +---> Launches background services
-    |     (waybar, swaync, wallpaper daemon)
-    |
-    +---> Applications read configs via symlinks
-          (kitty, wofi, fastfetch, etc.)
-```
+**Compositor**: Hyprland (Wayland)  
+**Terminal**: Kitty  
+**Bar**: Waybar  
+**Launcher**: Wofi  
+**Theme**: Gruvbox Dark Hard  
+**Display Manager**: ly-dm  
+**Configuration Management**: Git + Symlinks
 
 ### Design Philosophy
 
-This configuration follows a single-source-of-truth approach where all configurations live in one directory (`~/.config/hypr/`) and are version-controlled with Git. Other applications access their configurations through symbolic links, ensuring consistency and easy backup/restore capabilities.
+This configuration follows a single-source-of-truth approach where all configurations reside in `~/.config/hypr/` and are accessed through symbolic links. This ensures:
+
+- Centralized version control
+- Easy backup and restoration
+- Consistent theming across applications
+- Portable configuration across machines
+
+---
+
+## Recent Changes
+
+### Configuration Cleanup
+
+**Hyprland Config Consolidation**
+
+- Merged 4 duplicate `general {}` blocks into single clean configuration
+- Consolidated 3 `decoration {}` blocks into unified block
+- Fixed deprecated syntax: `animations { enabled = yes, please :) }` to `enabled = true`
+- Migrated from `windowrule` v1 to `windowrulev2` syntax
+- Added battery optimization: `misc { vfr = true }`
+- Enhanced window interaction: `resize_on_border = true` with `extend_border_grab_area = 15`
+- Added visual enhancements: `dim_inactive` with configurable `dim_strength`
+
+**Scripts Created**
+
+- `hypr_consolidate.sh` - Automated config cleanup and single-block writer
+- `hypr_symlink.sh` - Symlink creation automation
+- `kitty_warm.sh` - Kitty theme warming script
+- `waybar_fix.sh` - Waybar syntax and module fixes
+- `keybinds_fix.sh` - Keybinding conflict resolution
+
+### Symlink Structure
+
+Established `~/.config/hypr/` as configuration source with symlinks for:
+
+- kitty
+- waybar
+- btop
+- wofi
+- nvim
+- fastfetch
+
+Verification: `ls -la ~/.config/ | grep '\->'`
+
+### Theme Unification - Gruvbox Dark
+
+**Kitty Terminal**
+
+- Converted from Catppuccin Mocha to Gruvbox Dark
+- Warmed background: `#282828` to `#1c1917`
+- Updated cursor color: `#fabd2f`
+- Updated URL color: `#fe8019`
+
+**Waybar**
+
+- Fixed deprecated syntax errors
+- Added battery module with state indicators (charging/warning/critical)
+- Optimized dimensions: height `35px` to `28px`
+- Improved spacing with proper margins
+- Reduced module padding for cleaner appearance
+- Applied Gruvbox Elongated theme with transparent modules
+
+**Btop**
+
+- Added Gruvbox theme variants (soft, standard, zsh-compatible)
+
+### Keybinding Updates
+
+**Fixed Conflicts**
+
+- Changed resize bindings: `bind` to `binde` for hold-to-repeat
+- Removed `SUPER+R` conflict (hyprctl reload vs wofi)
+- Removed `SUPER+N` conflict (wifi menu vs swaync)
+
+**New Bindings**
+
+- Added fine resize: `SUPER+ALT+HJKL` (10px increments)
+- Improved window management shortcuts
 
 ---
 
 ## Directory Structure
 
-### Root Configuration Directory
-
 ```
 ~/.config/hypr/
-├── .git/                      # Git repository metadata
-├── hyprland.conf              # Main Hyprland configuration (entry point)
-├── autostart.conf             # Services to launch at startup
+├── hyprland.conf              # Main configuration entry point
+├── hyprland(Best).conf        # Backup/alternative configuration
+├── autostart.conf             # Startup services
 ├── keybinds.conf              # Keyboard shortcuts
+├── keybinds.conf.bak.*        # Keybind backups
 ├── monitors.conf              # Display configuration
-├── variables.conf             # Environment variables and settings
+├── variables.conf             # Environment variables
 ├── windowrules.conf           # Window-specific rules
-├── hyprpaper.conf             # Wallpaper configuration
-├── readme.md                  # Documentation
+├── hyprpaper.conf             # Wallpaper daemon config
+├── readme.md                  # This file
 │
-├── kitty/                     # Terminal emulator configuration
-│   ├── kitty.conf
-│   └── style.conf
+├── battery-notify/
+│   └── battery_notify.sh      # Battery notification script
 │
-├── fastfetch/                 # System information tool
-│   └── config.jsonc
+├── btop/
+│   ├── btop.conf              # System monitor config
+│   ├── btop.conf.bak          # Backup
+│   └── themes/
+│       ├── gruvbox-soft.theme
+│       ├── gruvbox.theme
+│       └── gruvbox-zsh.theme
 │
-├── waybar/                    # Status bar
-│   ├── .git/
-│   ├── assets/
-│   ├── catppuccin/
-│   ├── gitmodules/
-│   ├── colors.css
-│   ├── config.jsonc
-│   ├── gitmodules-config.yaml
-│   ├── README.md
-│   ├── style.css
-│   └── wlr.sh
+├── fastfetch/
+│   └── config.jsonc           # System info display
 │
-├── swaync/                    # Notification center
-│   ├── icons/
-│   ├── themes/
-│   ├── config.json
-│   └── style.css
+├── kitty/
+│   ├── kitty.conf             # Terminal config
+│   ├── kitty.conf.bak         # Backup
+│   ├── style.conf             # Gruvbox styling
+│   ├── current-theme.conf     # Active theme
+│   └── current-theme1.conf    # Theme variant
 │
-├── wofi/                      # Application launcher
-│   ├── themes/
-│   ├── config.rasi
-│   └── config.rasi.save
+├── nvim/
+│   ├── init.lua               # Neovim entry point
+│   ├── lazy-lock.json         # Plugin lock file
+│   └── lua/
+│       ├── configs/           # Plugin configurations
+│       ├── custom/            # Custom modules
+│       ├── plugins/           # Plugin definitions
+│       ├── cheatsheet/        # Cheatsheet configs
+│       ├── autocmds.lua       # Auto commands
+│       ├── chadrc.lua         # NvChad config
+│       ├── mappings.lua       # Keymaps
+│       └── options.lua        # Editor options
 │
-├── wlogout/                   # Logout menu
-│   ├── icons/
-│   ├── layout_1
-│   ├── layout_2
-│   ├── style_1.css
-│   └── style_2.css
+├── themes/                    # Empty - centralized themes in apps
 │
-└── eww/                       # Widget system
-    └── (widget configurations)
+├── waybar/
+│   ├── config                 # Module configuration
+│   ├── style.css              # Gruvbox elongated styling
+│   └── bak_*/                 # Timestamped backups
+│
+├── wlogout/
+│   ├── layout_1, layout_2     # Menu layouts
+│   ├── style_1.css, style_2.css
+│   └── icons/                 # Power menu icons
+│
+└── wofi/
+    ├── config/config          # Launcher settings
+    ├── style.css              # Main styling
+    ├── colors.css             # Color definitions
+    ├── src/                   # Theme sources
+    │   ├── gruvbox/
+    │   ├── mocha/
+    │   ├── frappe/
+    │   ├── latte/
+    │   └── macchiato/
+    └── assets/                # Theme previews
 ```
 
-### Symbolic Link Structure
+### Symbolic Link Map
 
-Applications expect configurations in standard locations, but these are symlinked to the centralized repository:
-
-```
-~/.config/kitty/      -> ~/.config/hypr/kitty/
-~/.config/fastfetch/  -> ~/.config/hypr/fastfetch/
-~/.config/waybar/     -> ~/.config/hypr/waybar/
-~/.config/swaync/     -> ~/.config/hypr/swaync/
-~/.config/wofi/       -> ~/.config/hypr/wofi/
-~/.config/wlogout/    -> ~/.config/hypr/wlogout/
-~/.config/eww/        -> ~/.config/hypr/eww/
+```mermaid
+graph LR
+    A[~/.config/hypr/] --> B[Source of Truth]
+    
+    B --> C[~/.config/kitty/]
+    B --> D[~/.config/waybar/]
+    B --> E[~/.config/btop/]
+    B --> F[~/.config/wofi/]
+    B --> G[~/.config/nvim/]
+    B --> H[~/.config/fastfetch/]
+    
+    C -.symlink.-> I[kitty/]
+    D -.symlink.-> J[waybar/]
+    E -.symlink.-> K[btop/]
+    F -.symlink.-> L[wofi/]
+    G -.symlink.-> M[nvim/]
+    H -.symlink.-> N[fastfetch/]
+    
+    style A fill:#282828,stroke:#fabd2f,color:#ebdbb2
+    style B fill:#3c3836,stroke:#b8bb26,color:#ebdbb2
 ```
 
 ---
 
-## Core Components
+## System Architecture
 
-### Hyprland Configuration Files
+### Boot to Desktop Flow
+
+```mermaid
+sequenceDiagram
+    participant Boot as System Boot
+    participant DM as ly-dm
+    participant Hypr as Hyprland
+    participant Conf as Config Files
+    participant Apps as Applications
+    
+    Boot->>DM: Start Display Manager
+    DM->>DM: User Login
+    DM->>Hypr: Execute Hyprland
+    Hypr->>Conf: Read hyprland.conf
+    Conf->>Conf: Source variables.conf
+    Conf->>Conf: Source monitors.conf
+    Conf->>Conf: Source keybinds.conf
+    Conf->>Conf: Source windowrules.conf
+    Conf->>Conf: Source autostart.conf
+    Hypr->>Apps: Launch waybar
+    Hypr->>Apps: Launch hyprpaper
+    Hypr->>Apps: Launch notification daemon
+    Apps-->>Hypr: Services Running
+    Hypr->>DM: Desktop Ready
+```
+
+### Configuration Loading Order
+
+```mermaid
+graph TD
+    A[hyprland.conf] --> B[variables.conf]
+    B --> C[monitors.conf]
+    C --> D[keybinds.conf]
+    D --> E[windowrules.conf]
+    E --> F[autostart.conf]
+    
+    F --> G[waybar]
+    F --> H[hyprpaper]
+    F --> I[notification daemon]
+    F --> J[polkit agent]
+    
+    style A fill:#fb4934,stroke:#282828,color:#282828
+    style F fill:#b8bb26,stroke:#282828,color:#282828
+```
+
+### Application Launch Flow
+
+```mermaid
+flowchart LR
+    A[User Input] --> B{Keybind Detected}
+    B --> C[Hyprland Executor]
+    C --> D{Application Type}
+    
+    D -->|Terminal| E[kitty]
+    D -->|Launcher| F[wofi]
+    D -->|Browser| G[firefox]
+    
+    E --> H[Read Config]
+    F --> I[Read Config]
+    G --> J[Read Config]
+    
+    H --> K{Symlink?}
+    I --> K
+    J --> K
+    
+    K -->|Yes| L[~/.config/hypr/app/]
+    K -->|No| M[Standard Path]
+    
+    L --> N[Apply Configuration]
+    M --> N
+    
+    N --> O[Window Rules Applied]
+    O --> P[Application Running]
+    
+    style B fill:#fabd2f,stroke:#282828,color:#282828
+    style K fill:#83a598,stroke:#282828,color:#282828
+```
+
+---
+
+## Configuration Components
+
+### Hyprland Core Files
 
 #### hyprland.conf
 
-**Purpose**: Main entry point for Hyprland compositor configuration.
-
-**Function**: This file is read first when Hyprland starts. It sources all other configuration files and sets up the basic environment.
+Main configuration entry point that sources all modular configs.
 
 **Key Sections**:
 
-- Source statements for modular configs
-- Basic compositor settings
-- Plugin loading (if any)
-
-**Example Structure**:
-```
+```conf
+# Source modular configurations
 source = ~/.config/hypr/variables.conf
 source = ~/.config/hypr/monitors.conf
 source = ~/.config/hypr/keybinds.conf
 source = ~/.config/hypr/windowrules.conf
 source = ~/.config/hypr/autostart.conf
+
+# General settings (consolidated)
+general {
+    gaps_in = 5
+    gaps_out = 10
+    border_size = 2
+    col.active_border = rgb(b8bb26)
+    col.inactive_border = rgb(3c3836)
+    layout = dwindle
+    resize_on_border = true
+    extend_border_grab_area = 15
+}
+
+# Decoration (consolidated)
+decoration {
+    rounding = 8
+    active_opacity = 1.0
+    inactive_opacity = 0.9
+    drop_shadow = true
+    shadow_range = 4
+    shadow_render_power = 3
+    col.shadow = rgba(1a1a1aee)
+    dim_inactive = true
+    dim_strength = 0.2
+}
+
+# Animations (fixed syntax)
+animations {
+    enabled = true
+    bezier = myBezier, 0.05, 0.9, 0.1, 1.05
+    animation = windows, 1, 7, myBezier
+    animation = windowsOut, 1, 7, default, popin 80%
+    animation = border, 1, 10, default
+    animation = fade, 1, 7, default
+    animation = workspaces, 1, 6, default
+}
+
+# Misc optimizations
+misc {
+    vfr = true
+    disable_hyprland_logo = true
+    disable_splash_rendering = true
+}
 ```
 
 #### variables.conf
 
-**Purpose**: Centralized environment variables and global settings.
+Environment variables and global settings.
 
-**Contains**:
+```conf
+# GTK Theme
+env = GTK_THEME,Gruvbox-Dark
 
-- Environment variables (GTK themes, cursor themes)
-- XDG environment settings
-- Default applications
-- Graphics API settings (Vulkan, OpenGL)
-- Input method configuration
+# Qt Theme
+env = QT_QPA_PLATFORMTHEME,qt5ct
+env = QT_STYLE_OVERRIDE,kvantum
 
-**Why Separate**: Keeping variables in one place makes it easy to adjust environment settings without searching through multiple files.
+# Cursor Theme
+env = XCURSOR_THEME,Adwaita
+env = XCURSOR_SIZE,24
+
+# Default Applications
+env = TERMINAL,kitty
+env = BROWSER,firefox
+env = EDITOR,nvim
+
+# Wayland Environment
+env = XDG_CURRENT_DESKTOP,Hyprland
+env = XDG_SESSION_TYPE,wayland
+env = XDG_SESSION_DESKTOP,Hyprland
+
+# Graphics
+env = GBM_BACKEND,nvidia-drm
+env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+env = WLR_NO_HARDWARE_CURSORS,1
+```
 
 #### monitors.conf
 
-**Purpose**: Display configuration for single or multi-monitor setups.
+Display configuration.
 
-**Contains**:
-
-- Monitor names and identifiers
-- Resolution and refresh rate settings
-- Monitor positioning (x, y coordinates)
-- Scaling factors
-- Primary monitor designation
-
-**Example Configuration**:
-```
+```conf
+# Laptop display
 monitor = eDP-1, 1920x1080@60, 0x0, 1.0
+
+# External monitor (if connected)
 monitor = HDMI-A-1, 1920x1080@60, 1920x0, 1.0
+
+# Fallback for unknown monitors
+monitor = , preferred, auto, 1.0
 ```
 
 #### keybinds.conf
 
-**Purpose**: All keyboard shortcuts and mouse bindings.
+Keyboard shortcuts (conflicts resolved).
 
-**Contains**:
+**Window Management**:
 
-- Application launchers (terminal, browser, file manager)
-- Window management (move, resize, focus)
-- Workspace switching
-- Volume and brightness controls
-- Screenshot bindings
-- System controls (logout, lock, shutdown)
+```conf
+# Focus
+bind = SUPER, H, movefocus, l
+bind = SUPER, L, movefocus, r
+bind = SUPER, K, movefocus, u
+bind = SUPER, J, movefocus, d
 
-**Syntax**:
+# Move windows
+bind = SUPER SHIFT, H, movewindow, l
+bind = SUPER SHIFT, L, movewindow, r
+bind = SUPER SHIFT, K, movewindow, u
+bind = SUPER SHIFT, J, movewindow, d
+
+# Resize (fixed: bind -> binde for repeat)
+binde = SUPER CTRL, H, resizeactive, -40 0
+binde = SUPER CTRL, L, resizeactive, 40 0
+binde = SUPER CTRL, K, resizeactive, 0 -40
+binde = SUPER CTRL, J, resizeactive, 0 40
+
+# Fine resize (new)
+binde = SUPER ALT, H, resizeactive, -10 0
+binde = SUPER ALT, L, resizeactive, 10 0
+binde = SUPER ALT, K, resizeactive, 0 -10
+binde = SUPER ALT, J, resizeactive, 0 10
 ```
-bind = MODIFIER, KEY, action, parameters
-```
 
-**Example**:
-```
+**Application Launchers**:
+
+```conf
+# Terminal
 bind = SUPER, RETURN, exec, kitty
+
+# Application launcher (conflict resolved: removed R for reload)
+bind = SUPER, D, exec, wofi --show drun
+
+# Browser
+bind = SUPER, B, exec, firefox
+
+# File manager
+bind = SUPER, E, exec, thunar
+```
+
+**System Controls**:
+
+```conf
+# Close window
 bind = SUPER, Q, killactive
-bind = SUPER, 1, workspace, 1
+
+# Exit Hyprland
+bind = SUPER SHIFT, M, exit
+
+# Lock screen
+bind = SUPER, ESCAPE, exec, hyprlock
+
+# Logout menu
+bind = SUPER SHIFT, ESCAPE, exec, wlogout
+
+# Screenshot
+bind = , PRINT, exec, grim -g "$(slurp)" - | wl-copy
+bind = SHIFT, PRINT, exec, grim - | wl-copy
 ```
 
 #### windowrules.conf
 
-**Purpose**: Define behavior for specific applications.
+Window-specific behavior (migrated to v2 syntax).
 
-**Contains**:
+```conf
+# Float specific windows
+windowrulev2 = float, class:^(pavucontrol)$
+windowrulev2 = float, class:^(blueman-manager)$
+windowrulev2 = float, class:^(nm-connection-editor)$
 
-- Floating window rules
-- Workspace assignments
-- Opacity settings
-- Size and position rules
-- Focus behavior
+# Workspace assignments
+windowrulev2 = workspace 2, class:^(firefox)$
+windowrulev2 = workspace 3, class:^(Code)$
+windowrulev2 = workspace 4, class:^(spotify)$
 
-**Example**:
-```
-windowrule = float, pavucontrol
-windowrule = workspace 2, firefox
-windowrule = opacity 0.9, kitty
+# Opacity rules
+windowrulev2 = opacity 0.95 0.85, class:^(kitty)$
+windowrulev2 = opacity 1.0 1.0, class:^(firefox)$
+
+# Size rules
+windowrulev2 = size 800 600, class:^(pavucontrol)$
+windowrulev2 = center, class:^(pavucontrol)$
 ```
 
 #### autostart.conf
 
-**Purpose**: Services and applications to launch when Hyprland starts.
+Services launched at startup.
 
-**Contains**:
-
-- Status bar (waybar)
-- Notification daemon (swaync)
-- Wallpaper daemon (hyprpaper or swww)
-- Authentication agent
-- Network manager applet
-- Background services
-
-**Execution Order**: Services listed here start sequentially after Hyprland initializes.
-
-**Example**:
-```
+```conf
+# Status bar
 exec-once = waybar &
+
+# Wallpaper
+exec-once = hyprpaper &
+
+# Notification daemon (if using swaync)
 exec-once = swaync &
-exec-once = swww-daemon &
-exec-once = nm-applet &
-```
 
-#### hyprpaper.conf
+# Authentication agent
+exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
-**Purpose**: Wallpaper configuration for hyprpaper daemon.
+# Network manager applet
+exec-once = nm-applet --indicator &
 
-**Contains**:
-
-- Image preload declarations
-- Monitor-to-wallpaper mappings
-- Splash screen settings
-- IPC settings
-
-**Note**: Hyprpaper requires images to be preloaded into memory before assignment.
-
----
-
-## Application Configurations
-
-### Kitty Terminal
-
-**Location**: `~/.config/hypr/kitty/`
-
-**Purpose**: Terminal emulator configuration.
-
-**Files**:
-
-- `kitty.conf`: Main configuration (fonts, behavior, shortcuts)
-- `style.conf`: Color scheme and visual styling
-
-**Key Settings**:
-
-- Font family and size
-- Color scheme (often Catppuccin)
-- Window padding and opacity
-- Tab bar configuration
-- Keybindings for terminal operations
-
-**Integration**: Kitty is launched via Hyprland keybinds and reads its config through the symlink at `~/.config/kitty/`.
-
-### Fastfetch
-
-**Location**: `~/.config/hypr/fastfetch/`
-
-**Purpose**: System information display tool.
-
-**Files**:
-
-- `config.jsonc`: JSON configuration with comments
-
-**Function**: Displays system information (OS, kernel, CPU, GPU, memory) in ASCII art format. Often run in terminal startup (added to shell rc files).
-
-**Configuration Options**:
-
-- Modules to display
-- ASCII art logo
-- Color scheme
-- Information format
-
-### Waybar
-
-**Location**: `~/.config/hypr/waybar/`
-
-**Purpose**: Status bar for Wayland compositors.
-
-**Files**:
-
-- `config.jsonc`: Module configuration (what to display)
-- `style.css`: Visual styling (colors, fonts, spacing)
-- `colors.css`: Color definitions
-- `wlr.sh`: Workspace indicator script
-- `assets/`: Icons and images
-- `catppuccin/`: Theme files
-- `gitmodules/`: Git submodule configurations
-
-**Modules**:
-
-- Clock and calendar
-- CPU, memory, temperature
-- Network status
-- Battery indicator
-- Volume control
-- Workspace indicators
-- System tray
-- Custom scripts
-
-**Execution**: Started by `autostart.conf` and runs continuously in the background.
-
-### SwayNC (Sway Notification Center)
-
-**Location**: `~/.config/hypr/swaync/`
-
-**Purpose**: Notification daemon and control center.
-
-**Files**:
-
-- `config.json`: Notification behavior and settings
-- `style.css`: Visual styling
-- `icons/`: Notification icons
-- `themes/`: Color themes
-
-**Features**:
-
-- Desktop notifications
-- Notification history
-- Do Not Disturb mode
-- Custom notification rules
-- Control center panel
-
-**Integration**: Started at login via `autostart.conf` and accessed via keybinds or status bar click.
-
-### Wofi
-
-**Location**: `~/.config/hypr/wofi/`
-
-**Purpose**: Application launcher and dmenu replacement.
-
-**Files**:
-
-- `config.rasi`: Main configuration
-- `themes/`: Color themes and styling
-
-**Modes**:
-
-- `drun`: Application launcher (reads .desktop files)
-- `run`: Command runner
-- `dmenu`: Menu mode for scripts
-
-**Invocation**: Triggered by keybind (usually Super+D or Super+R) defined in `keybinds.conf`.
-
-### Wlogout
-
-**Location**: `~/.config/hypr/wlogout/`
-
-**Purpose**: Logout/shutdown menu.
-
-**Files**:
-
-- `layout_1`, `layout_2`: Button layouts
-- `style_1.css`, `style_2.css`: Visual themes
-- `icons/`: Action icons (shutdown, reboot, logout, lock)
-
-**Actions**:
-
-- Logout (exit Hyprland)
-- Lock screen
-- Suspend
-- Reboot
-- Shutdown
-
-**Invocation**: Triggered by keybind, displays graphical menu with power options.
-
-### Eww (ElKowar's Wacky Widgets)
-
-**Location**: `~/.config/hypr/eww/`
-
-**Purpose**: Custom widget system for creating desktop widgets and bars.
-
-**Capabilities**:
-
-- Custom dashboard
-- System monitors
-- Calendar widgets
-- Music player controls
-- Custom bars
-
-**Language**: Uses Yuck (Lisp-like) for widget definitions and Eww's scripting capabilities.
-
----
-
-## Execution Flow
-
-### System Boot to Desktop
-
-#### Stage 1: System Initialization
-
-```
-Power On
-    |
-    v
-BIOS/UEFI
-    |
-    v
-Bootloader (GRUB/systemd-boot)
-    |
-    v
-Linux Kernel loads
-    |
-    v
-systemd init system starts
-    |
-    v
-Display Manager (ly-dm) launches
-```
-
-#### Stage 2: User Login
-
-```
-Display Manager shows login prompt
-    |
-    v
-User enters credentials
-    |
-    v
-ly-dm validates authentication
-    |
-    v
-ly-dm reads session files from:
-    - /usr/share/wayland-sessions/hyprland.desktop
-    |
-    v
-Session file contains:
-    Exec=Hyprland
-    |
-    v
-ly-dm executes Hyprland binary
-```
-
-#### Stage 3: Hyprland Initialization
-
-```
-Hyprland process starts
-    |
-    v
-Reads ~/.config/hypr/hyprland.conf
-    |
-    v
-Processes source directives in order:
-    |
-    +---> source = variables.conf
-    |       (Sets environment variables)
-    |
-    +---> source = monitors.conf
-    |       (Configures displays)
-    |
-    +---> source = keybinds.conf
-    |       (Registers keyboard shortcuts)
-    |
-    +---> source = windowrules.conf
-    |       (Sets window behavior rules)
-    |
-    +---> source = autostart.conf
-          (Launches background services)
-```
-
-#### Stage 4: Autostart Execution
-
-```
-autostart.conf processes exec-once directives:
-    |
-    +---> waybar &
-    |       (Status bar starts, reads config via symlink)
-    |
-    +---> swaync &
-    |       (Notification daemon starts)
-    |
-    +---> swww-daemon &
-    |       (Wallpaper daemon initializes)
-    |
-    +---> swww img ~/Pictures/wallpaper/image.jpg
-    |       (Wallpaper sets)
-    |
-    +---> nm-applet &
-    |       (Network manager tray icon)
-    |
-    +---> /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-          (Authentication agent for sudo prompts)
-```
-
-#### Stage 5: Ready State
-
-```
-Desktop is ready
-    |
-    +---> Compositor running (Hyprland)
-    +---> Status bar visible (Waybar)
-    +---> Wallpaper displayed
-    +---> Background services active
-    +---> Waiting for user input
-```
-
-### Application Launch Flow
-
-#### Terminal Launch Example
-
-```
-User presses Super+Return
-    |
-    v
-Hyprland detects key combination
-    |
-    v
-Looks up binding in keybinds.conf:
-    bind = SUPER, RETURN, exec, kitty
-    |
-    v
-Executes kitty binary
-    |
-    v
-Kitty looks for config at ~/.config/kitty/kitty.conf
-    |
-    v
-Symlink redirects to ~/.config/hypr/kitty/kitty.conf
-    |
-    v
-Kitty reads configuration
-    |
-    v
-Kitty applies settings:
-    - Font
-    - Colors
-    - Opacity
-    - Keybinds
-    |
-    v
-Kitty window appears on screen
-    |
-    v
-Hyprland applies window rules from windowrules.conf
-    |
-    v
-Window is ready for user input
-```
-
-#### Application Launcher Flow
-
-```
-User presses Super+D
-    |
-    v
-Hyprland executes: wofi --show drun
-    |
-    v
-Wofi process starts
-    |
-    v
-Reads config from ~/.config/wofi/ (symlink)
-    |
-    v
-Scans for .desktop files in:
-    - /usr/share/applications/
-    - ~/.local/share/applications/
-    |
-    v
-Displays application list with search
-    |
-    v
-User selects application (e.g., Firefox)
-    |
-    v
-Wofi executes command from .desktop file:
-    Exec=firefox
-    |
-    v
-Firefox launches
-    |
-    v
-Hyprland checks windowrules.conf:
-    windowrule = workspace 2, firefox
-    |
-    v
-Moves Firefox to workspace 2
-    |
-    v
-Application is running
-```
-
-### Notification Flow
-
-```
-Application wants to show notification
-    |
-    v
-Sends D-Bus notification message
-    |
-    v
-SwayNC (notification daemon) receives message
-    |
-    v
-Reads config from ~/.config/swaync/ (symlink)
-    |
-    v
-Checks notification rules:
-    - Priority
-    - Application-specific settings
-    - Do Not Disturb status
-    |
-    v
-If not suppressed, displays notification:
-    - Popup on screen (temporary)
-    - Adds to notification center (persistent)
-    |
-    v
-User can click to dismiss or open notification center
-    |
-    v
-Notification center shows history with actions
+# Battery notifications
+exec-once = ~/.config/hypr/battery-notify/battery_notify.sh &
 ```
 
 ---
 
-## Configuration Management
+## Theme System
 
-### Why This Structure Works
+### Gruvbox Color Palette
 
-#### Centralization Benefits
+#### Base Colors
 
-All configurations in one directory provides:
+```css
+/* Dark Hard Variant */
+@define-color bg0_hard    #1d2021;  /* Darkest background */
+@define-color bg0         #282828;  /* Normal background */
+@define-color bg1         #3c3836;  /* Elevated surfaces */
+@define-color bg2         #504945;  /* Higher elevation */
+@define-color bg3         #665c54;  /* Borders */
 
-**Version Control**: Single Git repository tracks all changes. You can view history, revert changes, and maintain branches for different setups.
-
-**Backup and Restore**: Backing up `~/.config/hypr/` preserves entire desktop environment. Restoration is copying one directory and creating symlinks.
-
-**Portability**: Clone repository on new machine, create symlinks, and environment is identical.
-
-**Consistency**: Related configurations are co-located. Changing color scheme affects all applications in one place.
-
-#### Symlink Strategy
-
-**Problem**: Applications expect configs in standard locations (`~/.config/appname/`).
-
-**Solution**: Symbolic links redirect reads to centralized location.
-
-**Mechanism**:
-```bash
-ln -s ~/.config/hypr/kitty ~/.config/kitty
+/* Foreground */
+@define-color fg0         #fbf1c7;  /* Brightest text */
+@define-color fg1         #ebdbb2;  /* Primary text */
+@define-color fg2         #d5c4a1;  /* Secondary text */
+@define-color fg3         #bdae93;  /* Tertiary text */
 ```
 
-This creates a pointer. When kitty reads `~/.config/kitty/kitty.conf`, it actually reads `~/.config/hypr/kitty/kitty.conf`.
+#### Accent Colors
 
-**Advantages**:
+```css
+/* Primary Accents */
+@define-color red         #fb4934;  /* Errors, urgent */
+@define-color green       #b8bb26;  /* Success, active */
+@define-color yellow      #fabd2f;  /* Warnings, highlights */
+@define-color blue        #83a598;  /* Info, links */
+@define-color purple      #d3869b;  /* Special elements */
+@define-color aqua        #8ec07c;  /* Secondary highlights */
+@define-color orange      #fe8019;  /* Accent elements */
 
-- Applications work without modification
-- Single source of truth maintained
-- Changes propagate automatically
-- No configuration duplication
-
-### Modular Configuration Pattern
-
-#### Why Split Hyprland Config
-
-Large monolithic configuration files become difficult to maintain. Splitting into focused modules provides:
-
-**Readability**: Each file has single responsibility.
-
-**Maintainability**: Finding and changing specific settings is faster.
-
-**Reusability**: Monitor configs differ between machines, but keybinds might be identical.
-
-**Collaboration**: Multiple people can edit different files without conflicts.
-
-#### Source Directive
-
-Hyprland's `source` directive includes external files at that position:
-
-```
-source = ~/.config/hypr/monitors.conf
+/* Dimmed Variants */
+@define-color red_dim     #cc2412;
+@define-color green_dim   #98971a;
+@define-color yellow_dim  #d79921;
+@define-color blue_dim    #458588;
+@define-color purple_dim  #b16286;
+@define-color aqua_dim    #689d6a;
+@define-color orange_dim  #d65d0e;
 ```
 
-Is equivalent to copying the contents of `monitors.conf` into that location in `hyprland.conf`.
+### Application-Specific Theming
 
-**Order Matters**: Variables must be defined before use. Typical order:
-
-1. variables.conf (defines values)
-2. monitors.conf (may use variables)
-3. keybinds.conf (references applications)
-4. windowrules.conf (defines behaviors)
-5. autostart.conf (launches services using above configs)
-
-### Git Integration
-
-#### Repository Structure
-
-```
-~/.config/hypr/.git/
-```
-
-This directory is a Git repository. All files in `~/.config/hypr/` are tracked.
-
-**Common Git Operations**:
-
-**Check Status**:
-```bash
-cd ~/.config/hypr
-git status
-```
-
-**Commit Changes**:
-```bash
-git add .
-git commit -m "Update waybar theme"
+```mermaid
+graph TD
+    A[Gruvbox Palette] --> B[Hyprland]
+    A --> C[Kitty]
+    A --> D[Waybar]
+    A --> E[Btop]
+    A --> F[Wofi]
+    A --> G[Neovim]
+    
+    B --> H[Border Colors]
+    C --> I[Terminal Colors]
+    D --> J[Bar Styling]
+    E --> K[Graph Colors]
+    F --> L[Launcher Theme]
+    G --> M[Editor Theme]
+    
+    style A fill:#b8bb26,stroke:#282828,color:#282828
+    style B fill:#fb4934,stroke:#282828,color:#fbf1c7
+    style C fill:#fabd2f,stroke:#282828,color:#282828
+    style D fill:#83a598,stroke:#282828,color:#fbf1c7
+    style E fill:#d3869b,stroke:#282828,color:#fbf1c7
+    style F fill:#8ec07c,stroke:#282828,color:#282828
+    style G fill:#fe8019,stroke:#282828,color:#282828
 ```
 
-**View History**:
-```bash
-git log --oneline
+### Kitty Terminal Theme
+
+**File**: `kitty/style.conf`
+
+```conf
+# Background and Foreground
+background #1c1917
+foreground #ebdbb2
+
+# Cursor
+cursor #fabd2f
+cursor_text_color #282828
+
+# Selection
+selection_foreground #282828
+selection_background #fabd2f
+
+# URL Color
+url_color #fe8019
+
+# Black
+color0  #282828
+color8  #928374
+
+# Red
+color1  #fb4934
+color9  #fb4934
+
+# Green
+color2  #b8bb26
+color10 #b8bb26
+
+# Yellow
+color3  #fabd2f
+color11 #fabd2f
+
+# Blue
+color4  #83a598
+color12 #83a598
+
+# Magenta
+color5  #d3869b
+color13 #d3869b
+
+# Cyan
+color6  #8ec07c
+color14 #8ec07c
+
+# White
+color7  #ebdbb2
+color15 #fbf1c7
 ```
 
-**Revert Changes**:
-```bash
-git checkout -- keybinds.conf
-```
+### Waybar Theme
 
-**Create Backup Branch**:
-```bash
-git branch laptop-backup
-```
+**File**: `waybar/style.css`
 
-#### Submodules
+```css
+* {
+  font-family: "Maple Mono NF", "JetBrains Mono Nerd Font", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  min-height: 0;
+}
 
-Some subdirectories (like waybar) may have their own Git repositories:
+#waybar {
+  background: transparent;
+  color: #ebdbb2;
+  margin: 8px 16px;
+}
 
-```
-~/.config/hypr/waybar/.git/
-```
+#workspaces button {
+  color: #fabd2f;
+  background: rgba(60, 56, 54, 0.85);
+  padding: 0.5rem 1.2rem;
+  margin: 2px 3px;
+  border-radius: 6px;
+}
 
-These are Git submodules, allowing independent version control of components while maintaining parent repository structure.
+#workspaces button.active {
+  color: #b8bb26;
+  background: #3c3836;
+  font-weight: 600;
+}
 
-**Update Submodule**:
-```bash
-cd ~/.config/hypr/waybar
-git pull origin main
+#clock {
+  color: #83a598;
+  background: rgba(60, 56, 54, 0.85);
+  padding: 0.6rem 2rem;
+  border-radius: 8px;
+}
+
+#battery {
+  color: #b8bb26;
+}
+
+#battery.charging {
+  color: #8ec07c;
+}
+
+#battery.warning:not(.charging) {
+  color: #fabd2f;
+}
+
+#battery.critical:not(.charging) {
+  color: #fb4934;
+}
 ```
 
 ---
 
-## Installation Guide
+## Installation
 
 ### Prerequisites
 
-**Required Packages**:
+**Required Packages** (Arch Linux):
 
-- Hyprland compositor
-- Waybar (status bar)
-- Kitty (terminal emulator)
-- Wofi (launcher)
-- SwayNC (notifications)
-- swww (wallpaper daemon)
-- ly-dm (display manager)
-- polkit-gnome (authentication agent)
-- network-manager-applet
-
-**Arch Linux Installation**:
 ```bash
-sudo pacman -S hyprland waybar kitty wofi swaync swww ly polkit-gnome network-manager-applet fastfetch
+sudo pacman -S hyprland waybar kitty wofi ly polkit-gnome \
+               network-manager-applet fastfetch btop neovim \
+               grim slurp wl-clipboard hyprpaper
 ```
 
-### Fresh Installation
+**AUR Packages**:
+
+```bash
+yay -S hyprlock-git
+```
+
+### Setup Process
 
 #### Step 1: Clone Repository
 
 ```bash
+# Backup existing configs if any
+mv ~/.config/hypr ~/.config/hypr.bak
+
+# Clone this repository
 cd ~/.config
 git clone <your-repo-url> hypr
+cd hypr
 ```
 
 #### Step 2: Create Symlinks
 
+**Automated Method**:
+
 ```bash
-# Kitty
+# Use the provided script
+bash hypr_symlink.sh
+```
+
+**Manual Method**:
+
+```bash
+# Remove existing configs
 rm -rf ~/.config/kitty
-ln -s ~/.config/hypr/kitty ~/.config/kitty
-
-# Fastfetch
-rm -rf ~/.config/fastfetch
-ln -s ~/.config/hypr/fastfetch ~/.config/fastfetch
-
-# Waybar
 rm -rf ~/.config/waybar
-ln -s ~/.config/hypr/waybar ~/.config/waybar
-
-# SwayNC
-rm -rf ~/.config/swaync
-ln -s ~/.config/hypr/swaync ~/.config/swaync
-
-# Wofi
+rm -rf ~/.config/btop
 rm -rf ~/.config/wofi
+rm -rf ~/.config/nvim
+rm -rf ~/.config/fastfetch
+
+# Create symlinks
+ln -s ~/.config/hypr/kitty ~/.config/kitty
+ln -s ~/.config/hypr/waybar ~/.config/waybar
+ln -s ~/.config/hypr/btop ~/.config/btop
 ln -s ~/.config/hypr/wofi ~/.config/wofi
-
-# Wlogout
-rm -rf ~/.config/wlogout
-ln -s ~/.config/hypr/wlogout ~/.config/wlogout
-
-# Eww (if used)
-rm -rf ~/.config/eww
-ln -s ~/.config/hypr/eww ~/.config/eww
+ln -s ~/.config/hypr/nvim ~/.config/nvim
+ln -s ~/.config/hypr/fastfetch ~/.config/fastfetch
 ```
 
 #### Step 3: Verify Symlinks
 
 ```bash
-ls -la ~/.config | grep -E "kitty|waybar|wofi|swaync"
+ls -la ~/.config | grep '\->'
 ```
 
-Expected output shows arrows pointing to `hypr/` subdirectories.
+Expected output shows arrows pointing to `hypr/` subdirectories:
+
+```
+kitty -> /home/user/.config/hypr/kitty
+waybar -> /home/user/.config/hypr/waybar
+btop -> /home/user/.config/hypr/btop
+...
+```
 
 #### Step 4: Configure Display Manager
 
-Ensure ly-dm is enabled:
 ```bash
+# Enable ly-dm
 sudo systemctl enable ly.service
 sudo systemctl start ly.service
 ```
 
 #### Step 5: Set Wallpaper
 
-Place wallpaper image:
 ```bash
+# Create wallpaper directory
 mkdir -p ~/Pictures/wallpaper
-cp /path/to/image.jpg ~/Pictures/wallpaper/
+
+# Copy your wallpaper
+cp /path/to/wallpaper.jpg ~/Pictures/wallpaper/
+
+# Edit hyprpaper.conf to point to your wallpaper
 ```
 
-Update wallpaper config:
+#### Step 6: First Login
+
+1. Logout of current session
+2. At ly-dm, select Hyprland
+3. Login with credentials
+4. Desktop should load with all configurations applied
+
+### Post-Installation
+
+**Verify Services**:
+
 ```bash
-# Edit hyprpaper.conf or autostart.conf
-# Point to your wallpaper path
+# Check Waybar
+ps aux | grep waybar
+
+# Check wallpaper daemon
+ps aux | grep hyprpaper
+
+# Check all Hyprland processes
+hyprctl clients
 ```
 
-#### Step 6: Login
+**Test Keybindings**:
 
-Logout of current session, select Hyprland from ly-dm, and login.
+- `SUPER + RETURN` - Open terminal
+- `SUPER + D` - Launch application menu
+- `SUPER + Q` - Close window
+- `SUPER + 1-9` - Switch workspaces
 
-### Updating Existing Installation
+---
 
-#### Pull Latest Changes
+## Keybindings
 
-```bash
-cd ~/.config/hypr
-git pull origin main
-```
+### Quick Reference
 
-#### Restart Components
+#### Window Management
 
-**Restart Hyprland**:
-```
-Super+Shift+M (or configured exit bind)
-```
-Then login again.
+| Keybind | Action |
+|---------|--------|
+| `SUPER + H/J/K/L` | Focus window (vim-style) |
+| `SUPER + SHIFT + H/J/K/L` | Move window |
+| `SUPER + CTRL + H/J/K/L` | Resize window (40px) |
+| `SUPER + ALT + H/J/K/L` | Fine resize (10px) |
+| `SUPER + Q` | Close window |
+| `SUPER + V` | Toggle floating |
+| `SUPER + F` | Toggle fullscreen |
+| `SUPER + P` | Toggle pseudo-tiling |
 
-**Reload Waybar**:
-```bash
-killall waybar
-waybar &
-```
+#### Workspace Management
 
-**Reload Notifications**:
-```bash
-killall swaync
-swaync &
-```
+| Keybind | Action |
+|---------|--------|
+| `SUPER + 1-9` | Switch to workspace 1-9 |
+| `SUPER + SHIFT + 1-9` | Move window to workspace |
+| `SUPER + Mouse Scroll` | Cycle workspaces |
+| `SUPER + TAB` | Next workspace |
+| `SUPER + SHIFT + TAB` | Previous workspace |
+
+#### Application Launchers
+
+| Keybind | Action |
+|---------|--------|
+| `SUPER + RETURN` | Terminal (kitty) |
+| `SUPER + D` | Application launcher (wofi) |
+| `SUPER + B` | Browser (firefox) |
+| `SUPER + E` | File manager (thunar) |
+
+#### System Controls
+
+| Keybind | Action |
+|---------|--------|
+| `SUPER + ESCAPE` | Lock screen |
+| `SUPER + SHIFT + ESCAPE` | Logout menu |
+| `SUPER + SHIFT + M` | Exit Hyprland |
+| `PRINT` | Screenshot (select area) |
+| `SHIFT + PRINT` | Screenshot (full screen) |
+
+#### Media Controls
+
+| Keybind | Action |
+|---------|--------|
+| `XF86AudioRaiseVolume` | Volume up |
+| `XF86AudioLowerVolume` | Volume down |
+| `XF86AudioMute` | Toggle mute |
+| `XF86MonBrightnessUp` | Brightness up |
+| `XF86MonBrightnessDown` | Brightness down |
 
 ---
 
 ## Troubleshooting
 
-### Hyprland Won't Start
+### Common Issues
 
-**Symptom**: Black screen after login or immediate logout.
+#### Waybar Not Appearing
 
-**Diagnosis**:
-
-Check Hyprland logs:
-```bash
-cat /tmp/hypr/$(ls -t /tmp/hypr | head -1)/hyprland.log
-```
-
-**Common Causes**:
-
-**Syntax Error in Config**: Look for error messages referencing line numbers.
-
-**Solution**: Fix syntax in referenced file.
-
-**Missing Dependencies**: Log shows "command not found" errors.
-
-**Solution**: Install missing packages.
-
-**Monitor Configuration**: Invalid monitor name or resolution.
-
-**Solution**: Run `hyprctl monitors` in TTY, correct `monitors.conf`.
-
-### Waybar Not Appearing
-
-**Symptom**: Hyprland starts but no status bar visible.
+**Symptom**: Status bar missing after login
 
 **Diagnosis**:
 
-Check if running:
 ```bash
+# Check if running
 ps aux | grep waybar
-```
 
-Check logs:
-```bash
+# Check logs
 waybar --log-level debug
 ```
 
-**Common Causes**:
+**Solutions**:
 
-**Configuration Error**: Syntax error in `config.jsonc` or `style.css`.
+1. Check Waybar configuration syntax
+   ```bash
+   # Validate JSON
+   jsonlint ~/.config/waybar/config
+   ```
 
-**Solution**: Validate JSON syntax, check CSS syntax.
+2. Restart Waybar
+   ```bash
+   killall waybar && waybar &
+   ```
 
-**Missing Modules**: Waybar module references non-existent script.
+3. Check for missing fonts
+   ```bash
+   fc-list | grep -i "nerd\|jetbrains"
+   ```
 
-**Solution**: Verify script paths, ensure executables exist.
+#### Keybindings Not Working
 
-**Font Issues**: Fonts not installed for icons.
+**Symptom**: Keyboard shortcuts don't trigger actions
 
-**Solution**: Install required fonts (often Nerd Fonts).
+**Solutions**:
 
-### Keybinds Not Working
+1. Check for syntax errors
+   ```bash
+   # View Hyprland log
+   cat ~/.local/share/hyprland/hyprland.log | grep -i "error\|warn"
+   ```
 
-**Symptom**: Keyboard shortcuts don't trigger actions.
+2. Reload configuration
+   ```bash
+   hyprctl reload
+   ```
+
+3. Check for conflicts (conflicts with R and N resolved in keybinds_fix.sh)
+
+#### Symlinks Broken
+
+**Symptom**: Applications use default configs instead of custom ones
 
 **Diagnosis**:
 
-Check Hyprland log for keybind registration errors.
-
-**Common Causes**:
-
-**Syntax Error**: Incorrect keybind syntax in `keybinds.conf`.
-
-**Solution**: Verify syntax: `bind = MODIFIER, KEY, action, parameters`
-
-**Application Not Installed**: Keybind launches non-existent application.
-
-**Solution**: Install application or update keybind.
-
-**Conflicting Binds**: Same key combination defined multiple times.
-
-**Solution**: Remove or modify duplicate bindings.
-
-### Applications Don't Apply Themes
-
-**Symptom**: Applications use default themes instead of configured ones.
-
-**Diagnosis**:
-
-Check if symlinks exist:
 ```bash
+# Check symlink status
 ls -la ~/.config/kitty
 ```
 
-Should show symlink arrow, not directory.
+**Solution**:
 
-**Common Causes**:
-
-**Symlink Not Created**: Application reads from wrong location.
-
-**Solution**: Create symlink as described in Installation Guide.
-
-**Theme Files Missing**: Config references non-existent theme files.
-
-**Solution**: Verify theme files exist in subdirectories.
-
-**Environment Variables**: GTK or Qt theme variables not set.
-
-**Solution**: Check `variables.conf` for theme environment variables.
-
-### Wallpaper Not Loading
-
-**Symptom**: Desktop background is solid color or black.
-
-**Diagnosis**:
-
-Check wallpaper daemon:
 ```bash
-ps aux | grep swww
+# Recreate symlink
+rm ~/.config/kitty
+ln -s ~/.config/hypr/kitty ~/.config/kitty
 ```
 
-**Common Causes**:
+#### Theme Not Applied
 
-**Daemon Not Running**: Wallpaper daemon didn't start.
+**Symptom**: Applications don't use Gruvbox colors
 
-**Solution**: Manually start: `swww-daemon &` and `swww img /path/to/image.jpg`
+**Solutions**:
 
-**Image Path Wrong**: Config references non-existent image.
+1. Check environment variables
+   ```bash
+   echo $GTK_THEME
+   ```
 
-**Solution**: Verify image path, use absolute paths.
+2. Verify theme files exist
+   ```bash
+   ls ~/.config/hypr/kitty/style.conf
+   ls ~/.config/hypr/waybar/style.css
+   ```
 
-**Hyprpaper Issues**: Hyprpaper didn't preload image.
+3. Restart applications
+   ```bash
+   # Example for kitty
+   killall kitty
+   kitty &
+   ```
 
-**Solution**: Check hyprpaper.conf syntax, ensure preload line exists.
+### Debug Commands
 
-### Notifications Not Showing
-
-**Symptom**: Applications send notifications but nothing appears.
-
-**Diagnosis**:
-
-Check SwayNC:
 ```bash
-ps aux | grep swaync
-```
+# View Hyprland version
+hyprctl version
 
-Test notification:
-```bash
-notify-send "Test" "This is a test notification"
-```
-
-**Common Causes**:
-
-**Daemon Not Running**: SwayNC didn't start.
-
-**Solution**: Start manually: `swaync &`
-
-**Do Not Disturb Enabled**: Notifications suppressed.
-
-**Solution**: Toggle DND mode via keybind or control center.
-
-**Configuration Error**: Syntax error in `config.json`.
-
-**Solution**: Validate JSON syntax, check for missing commas or brackets.
-
----
-
-## Advanced Topics
-
-### Multi-Monitor Workflow
-
-**Configuration**: Edit `monitors.conf` to define each display.
-
-**Example**:
-```
-monitor = eDP-1, 1920x1080@60, 0x0, 1.0
-monitor = HDMI-A-1, 2560x1440@144, 1920x0, 1.0
-```
-
-**Workspace Assignment**: Assign workspaces to specific monitors in `hyprland.conf`.
-
-**Per-Monitor Wallpapers**: Configure different wallpapers in `hyprpaper.conf` or `autostart.conf`.
-
-### Laptop vs Desktop Profiles
-
-**Strategy**: Use Git branches for different machines.
-
-**Laptop Branch**:
-```bash
-git checkout -b laptop
-```
-
-Modify `monitors.conf` for single display, adjust power settings in `variables.conf`.
-
-**Desktop Branch**:
-```bash
-git checkout -b desktop
-```
-
-Configure multiple monitors, remove battery-related waybar modules.
-
-**Switching**:
-```bash
-git checkout laptop  # or desktop
-```
-
-### Custom Scripts Integration
-
-**Location**: Store scripts in `~/.config/hypr/scripts/`.
-
-**Usage**: Reference in keybinds or waybar modules.
-
-**Example Keybind**:
-```
-bind = SUPER, P, exec, ~/.config/hypr/scripts/screenshot.sh
-```
-
-**Example Waybar Module**:
-```json
-"custom/script": {
-    "exec": "~/.config/hypr/scripts/check-updates.sh",
-    "interval": 3600
-}
-```
-
-### Theme Synchronization
-
-**Approach**: Use consistent color schemes across all applications.
-
-**Common Choice**: Catppuccin theme family.
-
-**Files to Coordinate**:
-
-- `waybar/colors.css`
-- `kitty/style.conf`
-- `swaync/style.css`
-- `wofi/themes/`
-- GTK theme (in `variables.conf`)
-
-**Tool**: Consider theme generators or dotfile managers for consistency.
-
----
-
-## Appendix
-
-### File Reference Quick Guide
-
-**Configuration Entry Point**: `hyprland.conf`
-
-**Display Settings**: `monitors.conf`
-
-**Keyboard Shortcuts**: `keybinds.conf`
-
-**Environment Variables**: `variables.conf`
-
-**Window Behavior**: `windowrules.conf`
-
-**Startup Services**: `autostart.conf`
-
-**Terminal**: `kitty/kitty.conf`
-
-**Status Bar**: `waybar/config.jsonc`, `waybar/style.css`
-
-**Notifications**: `swaync/config.json`, `swaync/style.css`
-
-**Launcher**: `wofi/config.rasi`
-
-**Wallpaper**: `hyprpaper.conf` or `autostart.conf` (swww)
-
-### Common Commands
-
-**Reload Hyprland Config**:
-```bash
-hyprctl reload
-```
-
-**List Monitors**:
-```bash
-hyprctl monitors
-```
-
-**List Windows**:
-```bash
+# List active windows
 hyprctl clients
+
+# List monitors
+hyprctl monitors
+
+# View current bindings
+hyprctl binds
+
+# Reload Hyprland config
+hyprctl reload
+
+# View active workspace
+hyprctl activeworkspace
 ```
-
-**Reload Waybar**:
-```bash
-killall waybar && waybar &
-```
-
-**Test Notification**:
-```bash
-notify-send "Title" "Message"
-```
-
-**Launch Application Manually**:
-```bash
-kitty
-wofi --show drun
-```
-
-### Glossary
-
-**Compositor**: Software that manages window rendering and display in Wayland. Combines window manager and display server roles.
-
-**Wayland**: Modern display protocol replacing X11. Defines communication between applications and compositors.
-
-**Symlink**: Symbolic link, a file that points to another file or directory. Applications read symlink target transparently.
-
-**Source Directive**: Hyprland configuration command to include external file contents.
-
-**Autostart**: Applications and services launched automatically when compositor starts.
-
-**Module**: Self-contained configuration component (in Waybar) or config file section.
-
-**IPC**: Inter-Process Communication, mechanism for processes to exchange data. Hyprland exposes IPC for runtime control.
-
-**DPI/Scaling**: Dots Per Inch or scaling factor for high-resolution displays.
-
-**Workspace**: Virtual desktop, separate screen space for organizing windows.
-
-**Keybind**: Keyboard shortcut, combination of modifier keys and regular key triggering action.
-
-**Window Rule**: Configuration that defines specific window behavior based on application or window properties.
 
 ---
 
-## Maintenance Checklist
+## Maintenance
 
 ### Regular Tasks
 
-**Weekly**:
+#### Weekly
 
-- Check for compositor updates
-- Test backup and restore procedure
-- Review and clean unused configurations
+```bash
+# Update system
+sudo pacman -Syu
 
-**Monthly**:
+# Check for config errors
+hyprctl reload
 
-- Update themes and color schemes
-- Review and optimize startup time
-- Clean up old Git commits with squash/rebase
+# Verify symlinks
+ls -la ~/.config | grep '\->'
+```
 
-**Quarterly**:
+#### Monthly
 
-- Document custom scripts and modifications
-- Review security of executed scripts
-- Update this documentation with new features
+```bash
+# Review and clean backups
+cd ~/.config/hypr
+rm -rf waybar/bak_*  # Keep only recent backups
+
+# Update themes
+# Check for theme updates in respective repositories
+
+# Optimize configuration
+# Review and remove unused settings
+```
 
 ### Backup Strategy
 
-**What to Backup**:
+#### Git-Based Backup
 
-- Entire `~/.config/hypr/` directory
-- `~/.local/share/applications/` (custom .desktop files)
-- `~/.local/bin/` (custom scripts if not in hypr/)
-
-**Backup Methods**:
-
-**Git Remote**: Push to GitHub/GitLab private repository
-
-**External Drive**: Periodic full copy
-
-**Cloud Sync**: Sync repository to cloud storage
-
-**Backup Command**:
 ```bash
+# Commit changes
 cd ~/.config/hypr
 git add .
-git commit -m "Backup $(date +%Y-%m-%d)"
+git commit -m "Update: $(date +%Y-%m-%d)"
+
+# Push to remote
 git push origin main
+```
+
+#### Full System Backup
+
+```bash
+# Backup entire config directory
+tar -czf hypr-backup-$(date +%Y%m%d).tar.gz ~/.config/hypr
+
+# Move to backup location
+mv hypr-backup-*.tar.gz ~/Backups/
+```
+
+### Update Procedure
+
+```bash
+# Pull latest changes
+cd ~/.config/hypr
+git pull origin main
+
+# Restart affected services
+killall waybar && waybar &
+
+# Reload Hyprland
+hyprctl reload
 ```
 
 ---
 
-## Conclusion
+## Scripts Reference
 
-This configuration represents a complete, maintainable, and portable Wayland desktop environment. The centralized structure with symbolic links ensures consistency while maintaining compatibility with standard application expectations. Version control enables safe experimentation and easy recovery, while modular configuration files keep the system organized and understandable.
+### Automation Scripts
 
-The execution flow from login through application launch is transparent and predictable, allowing for easy debugging and customization. Whether deploying on a new machine or maintaining an existing setup, this architecture provides the tools and structure necessary for efficient system management.
+**hypr_consolidate.sh** - Configuration cleanup
+
+- Merges duplicate blocks
+- Fixes syntax errors
+- Optimizes config structure
+
+**hypr_symlink.sh** - Symlink automation
+
+- Creates all required symlinks
+- Verifies link integrity
+- Handles existing configs
+
+**kitty_warm.sh** - Kitty theme adjustment
+
+- Adjusts background warmth
+- Updates cursor colors
+- Applies Gruvbox palette
+
+**waybar_fix.sh** - Waybar corrections
+
+- Fixes syntax errors
+- Updates module configuration
+- Applies Gruvbox elongated theme
+
+**keybinds_fix.sh** - Keybinding resolution
+
+- Removes conflicts
+- Updates deprecated syntax
+- Adds fine-grained controls
+
+---
+
+## Credits and Resources
+
+### Project Components
+
+- **Hyprland**: [hyprland.org](https://hyprland.org)
+- **Waybar**: [github.com/Alexays/Waybar](https://github.com/Alexays/Waybar)
+- **Kitty**: [sw.kovidgoyal.net/kitty](https://sw.kovidgoyal.net/kitty/)
+- **Gruvbox Theme**: [github.com/morhetz/gruvbox](https://github.com/morhetz/gruvbox)
+
+### Theme Resources
+
+- Gruvbox Official Repository
+- Catppuccin Theme (legacy reference)
+- Nerd Fonts for icons
+
+---
+
+## License
+
+This configuration is provided as-is for personal use. Individual components may have their own licenses.
+
+---
+
+**Last Updated**: 2026-04-30  
+**Maintained By**: mukul  
+**Version**: 2.0 (Gruvbox Unified)
