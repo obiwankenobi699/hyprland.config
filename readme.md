@@ -1139,6 +1139,4 @@ This configuration is provided as-is for personal use. Individual components may
 
 ---
 
-**Last Updated**: 2026-04-30  
-**Maintained By**: mukul  
-**Version**: 2.0 (Gruvbox Unified)
+
