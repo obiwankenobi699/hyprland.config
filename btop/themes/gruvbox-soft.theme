@@ -1,0 +1,44 @@
+# Gruvbox Soft (muted like your screenshot)
+
+theme[main_bg]="#32302f"
+theme[main_fg]="#ebdbb2"
+
+theme[title]="#d79921"
+theme[hi_fg]="#fabd2f"
+
+theme[selected_bg]="#3c3836"
+theme[selected_fg]="#ebdbb2"
+
+theme[inactive_fg]="#7c6f64"
+
+theme[graph_text]="#a89984"
+theme[meter_bg]="#3c3836"
+
+# Boxes (muted borders)
+theme[cpu_box]="#928374"
+theme[mem_box]="#928374"
+theme[net_box]="#928374"
+theme[proc_box]="#928374"
+
+# CPU graph (soft gradient)
+theme[cpu_start]="#98971a"
+theme[cpu_mid]="#d79921"
+theme[cpu_end]="#cc241d"
+
+# Memory
+theme[free_start]="#8ec07c"
+theme[free_mid]="#b8bb26"
+theme[free_end]="#fabd2f"
+
+theme[used_start]="#cc241d"
+theme[used_mid]="#d79921"
+theme[used_end]="#b8bb26"
+
+# Network
+theme[download_start]="#83a598"
+theme[download_mid]="#8ec07c"
+theme[download_end]="#b8bb26"
+
+theme[upload_start]="#d3869b"
+theme[upload_mid]="#fabd2f"
+theme[upload_end]="#cc241d"
