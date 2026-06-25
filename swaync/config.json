@@ -12,7 +12,7 @@
     "notification-body-image-width": 200,
     "notification-inline-replies": true,
     "notification-2fa-action": false,
-    "timeout": 3,
+    "timeout": 5,
     "timeout-low": 2,
     "timeout-critical": 6,
     "keyboard-shortcuts": true,
