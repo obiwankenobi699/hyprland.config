@@ -78,6 +78,7 @@ Scope {
                         }
                     }
 
+                    Weather { Layout.fillWidth: true }
                     NowPlaying { Layout.fillWidth: true }
                     StatsPanel { Layout.fillWidth: true }
                 }
@@ -101,6 +102,7 @@ Scope {
                         Layout.fillWidth: true
                         onRequestClose: dashScope.dashOpen = false
                     }
+                    Calendar { Layout.fillWidth: true }
                 }
             }
         }

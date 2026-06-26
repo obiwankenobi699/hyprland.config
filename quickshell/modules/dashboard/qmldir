@@ -3,3 +3,6 @@ Dashboard 1.0 Dashboard.qml
 StatsPanel 1.0 StatsPanel.qml
 ControlsPanel 1.0 ControlsPanel.qml
 NowPlaying 1.0 NowPlaying.qml
+Weather 1.0 Weather.qml
+Ring 1.0 Ring.qml
+Calendar 1.0 Calendar.qml

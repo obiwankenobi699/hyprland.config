@@ -11,19 +11,21 @@ Item {
     property string status: ""
     property string artist: ""
     property string title: ""
+    property string artUrl: ""
     readonly property bool hasPlayer: np.title.length > 0
 
     Process {
         id: proc
-        command: ["bash", "-lc", "playerctl metadata --format '{{status}}|{{artist}}|{{title}}' 2>/dev/null"]
+        command: ["bash", "-lc", "playerctl metadata --format '{{status}}|{{artist}}|{{title}}|{{mpris:artUrl}}' 2>/dev/null"]
         stdout: StdioCollector {
             id: c
             onStreamFinished: {
                 const t = c.text.trim();
-                if (t.length === 0) { np.status = ""; np.artist = ""; np.title = ""; }
+                if (t.length === 0) { np.status = ""; np.artist = ""; np.title = ""; np.artUrl = ""; }
                 else {
                     const p = t.split("|");
-                    np.status = p[0] || ""; np.artist = p[1] || ""; np.title = p[2] || "";
+                    np.status = p[0] || ""; np.artist = p[1] || "";
+                    np.title = p[2] || ""; np.artUrl = p[3] || "";
                 }
             }
         }
@@ -39,9 +41,29 @@ Item {
         color: Theme.bg2
         visible: np.hasPlayer
         RowLayout {
-            anchors { fill: parent; leftMargin: 14; rightMargin: 10 }
+            anchors { fill: parent; leftMargin: 12; rightMargin: 10 }
             spacing: 12
-            Text { text: "󰝙"; color: Theme.orange; font.family: Theme.font; font.pixelSize: 26 }
+            // album art (with glyph fallback)
+            Rectangle {
+                Layout.preferredWidth: 40
+                Layout.preferredHeight: 40
+                radius: 8
+                color: Theme.bg3
+                clip: true
+                Image {
+                    anchors.fill: parent
+                    source: np.artUrl
+                    visible: np.artUrl.length > 0 && status === Image.Ready
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                    cache: true
+                }
+                Text {
+                    anchors.centerIn: parent
+                    visible: np.artUrl.length === 0 || parent.children[0].status !== Image.Ready
+                    text: "󰝙"; color: Theme.orange; font.family: Theme.font; font.pixelSize: 22
+                }
+            }
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 0

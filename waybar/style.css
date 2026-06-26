@@ -1,4 +1,7 @@
-/* Gruvbox Dark theme for Waybar */
+/* Gruvbox Dark — Waybar (pill redesign) */
+@keyframes blink {
+    to { color: #fbf1c7; }
+}
 * {
     border: none;
     border-radius: 0;
@@ -6,82 +9,76 @@
     font-size: 12px;
     min-height: 0;
 }
-@keyframes blink {
-    to {
-        color: #fbf1c7;
-    }
-}
 window#waybar {
+    background-color: transparent;
+    color: #ebdbb2;
+}
+
+/* ── Each module = rounded pill ── */
+#workspaces,
+#submap,
+#clock,
+#pulseaudio,
+#battery,
+#network,
+#tray,
+#custom-notification,
+#custom-powerprofile,
+#custom-fanmax,
+#custom-power {
     background-color: #282828;
     border: 1px solid #3c3836;
-    border-radius: 6px;
-    color: #ebdbb2;
-    opacity: 0.95;
-    margin: 6px 12px 0px 12px;
+    border-radius: 10px;
+    padding: 1px 12px;
+    margin: 5px 3px;
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
-button {
-    box-shadow: inset 0 -3px transparent;
-    border: none;
-    border-radius: 0;
+
+/* ── Workspaces ── */
+#workspaces {
+    padding: 1px 4px;
 }
 #workspaces button {
-    padding: 0 6px;
-    background-color: transparent;
     color: #a89984;
+    padding: 0 8px;
+    margin: 2px 1px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 #workspaces button:hover {
-    background: #3c3836;
+    background-color: #3c3836;
     color: #ebdbb2;
 }
+#workspaces button.active,
 #workspaces button.focused {
     background-color: #fe8019;
-    color: #282828;
+    color: #1d2021;
     font-weight: bold;
+    padding: 0 14px;
 }
 #workspaces button.urgent {
     background-color: #fb4934;
-    color: #282828;
+    color: #1d2021;
 }
-#mode {
-    background-color: #fe8019;
-    color: #282828;
-    padding: 0 8px;
-    font-weight: bold;
+
+#submap {
+    color: #fe8019;
+    font-style: italic;
 }
+
+/* ── Center clock ── */
 #clock {
     color: #ebdbb2;
-    padding: 0 10px;
     font-weight: bold;
 }
-#cpu {
-    color: #b8bb26;
-    padding: 0 8px;
-}
-#memory {
-    color: #83a598;
-    padding: 0 8px;
-}
-#network {
-    color: #8ec07c;
-    padding: 0 8px;
-}
-#network.disconnected {
-    color: #fb4934;
-}
-#pulseaudio {
-    color: #d3869b;
-    padding: 0 8px;
-}
-#pulseaudio.muted {
-    color: #928374;
-}
-#battery {
-    color: #fabd2f;
-    padding: 0 8px;
-}
-#battery.warning {
-    color: #fe8019;
-}
+
+/* ── Right-side accents ── */
+#network { color: #8ec07c; }
+#network.disconnected { color: #fb4934; }
+#pulseaudio { color: #d3869b; }
+#pulseaudio.muted { color: #928374; }
+#battery { color: #fabd2f; }
+#battery.warning { color: #fe8019; }
 #battery.critical {
     color: #fb4934;
     animation-name: blink;
@@ -90,31 +87,20 @@ button {
     animation-iteration-count: infinite;
     animation-direction: alternate;
 }
-#battery.charging {
-    color: #b8bb26;
-}
-#tray {
-    padding: 0 8px;
-}
-#tray > .passive {
-    opacity: 0.6;
-}
-#tray > .needs-attention {
-    opacity: 1.0;
-    background-color: #fb4934;
-}
-tooltip {
-    background: #3c3836;
-    border: 1px solid #504945;
-    border-radius: 5px;
-    color: #ebdbb2;
-}
-tooltip label {
-    color: #ebdbb2;
-}
+#battery.charging { color: #b8bb26; }
+
+#custom-notification { color: #fabd2f; }
+#custom-notification.notification { color: #fe8019; }
+#custom-notification.dnd,
+#custom-notification.dnd-notification { color: #928374; }
+
+#custom-powerprofile.balanced { color: #83a598; }
+#custom-powerprofile.performance { color: #fe8019; font-weight: bold; }
+#custom-powerprofile.power-saver { color: #b8bb26; }
+#custom-powerprofile.unknown { color: #928374; }
+
 #custom-fanmax.max {
     color: #fb4934;
-    padding: 0 8px;
     font-weight: bold;
     animation-name: blink;
     animation-duration: 1s;
@@ -125,34 +111,27 @@ tooltip label {
 #custom-fanmax.auto {
     padding: 0;
     margin: 0;
+    border: none;
+    background-color: transparent;
 }
-#custom-powerprofile {
-    padding: 0 8px;
-    color: #83a598;
-}
-#custom-powerprofile.balanced {
-    color: #83a598;
-}
-#custom-powerprofile.performance {
-    color: #fe8019;
-    font-weight: bold;
-}
-#custom-powerprofile.power-saver {
-    color: #b8bb26;
-}
-#custom-powerprofile.unknown {
-    color: #928374;
-}
-#custom-notification {
-    color: #fabd2f;
-    padding: 0 8px;
-}
-#custom-notification.notification {
-    color: #fe8019;
-}
-#custom-notification.dnd {
-    color: #928374;
-}
-#custom-notification.dnd-notification {
+
+/* ── Power / session button ── */
+#custom-power {
     color: #fb4934;
+    padding: 1px 14px;
 }
+#custom-power:hover {
+    background-color: #fb4934;
+    color: #1d2021;
+}
+
+#tray > .passive { opacity: 0.6; }
+#tray > .needs-attention { background-color: #fb4934; }
+
+tooltip {
+    background-color: #1d2021;
+    border: 1px solid #504945;
+    border-radius: 8px;
+    color: #ebdbb2;
+}
+tooltip label { color: #ebdbb2; }
