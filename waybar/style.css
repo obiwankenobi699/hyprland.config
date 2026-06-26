@@ -1,0 +1,158 @@
+/* Gruvbox Dark theme for Waybar */
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 12px;
+    min-height: 0;
+}
+@keyframes blink {
+    to {
+        color: #fbf1c7;
+    }
+}
+window#waybar {
+    background-color: #282828;
+    border: 1px solid #3c3836;
+    border-radius: 6px;
+    color: #ebdbb2;
+    opacity: 0.95;
+    margin: 6px 12px 0px 12px;
+}
+button {
+    box-shadow: inset 0 -3px transparent;
+    border: none;
+    border-radius: 0;
+}
+#workspaces button {
+    padding: 0 6px;
+    background-color: transparent;
+    color: #a89984;
+}
+#workspaces button:hover {
+    background: #3c3836;
+    color: #ebdbb2;
+}
+#workspaces button.focused {
+    background-color: #fe8019;
+    color: #282828;
+    font-weight: bold;
+}
+#workspaces button.urgent {
+    background-color: #fb4934;
+    color: #282828;
+}
+#mode {
+    background-color: #fe8019;
+    color: #282828;
+    padding: 0 8px;
+    font-weight: bold;
+}
+#clock {
+    color: #ebdbb2;
+    padding: 0 10px;
+    font-weight: bold;
+}
+#cpu {
+    color: #b8bb26;
+    padding: 0 8px;
+}
+#memory {
+    color: #83a598;
+    padding: 0 8px;
+}
+#network {
+    color: #8ec07c;
+    padding: 0 8px;
+}
+#network.disconnected {
+    color: #fb4934;
+}
+#pulseaudio {
+    color: #d3869b;
+    padding: 0 8px;
+}
+#pulseaudio.muted {
+    color: #928374;
+}
+#battery {
+    color: #fabd2f;
+    padding: 0 8px;
+}
+#battery.warning {
+    color: #fe8019;
+}
+#battery.critical {
+    color: #fb4934;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: steps(12);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+#battery.charging {
+    color: #b8bb26;
+}
+#tray {
+    padding: 0 8px;
+}
+#tray > .passive {
+    opacity: 0.6;
+}
+#tray > .needs-attention {
+    opacity: 1.0;
+    background-color: #fb4934;
+}
+tooltip {
+    background: #3c3836;
+    border: 1px solid #504945;
+    border-radius: 5px;
+    color: #ebdbb2;
+}
+tooltip label {
+    color: #ebdbb2;
+}
+#custom-fanmax.max {
+    color: #fb4934;
+    padding: 0 8px;
+    font-weight: bold;
+    animation-name: blink;
+    animation-duration: 1s;
+    animation-timing-function: steps(12);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+#custom-fanmax.auto {
+    padding: 0;
+    margin: 0;
+}
+#custom-powerprofile {
+    padding: 0 8px;
+    color: #83a598;
+}
+#custom-powerprofile.balanced {
+    color: #83a598;
+}
+#custom-powerprofile.performance {
+    color: #fe8019;
+    font-weight: bold;
+}
+#custom-powerprofile.power-saver {
+    color: #b8bb26;
+}
+#custom-powerprofile.unknown {
+    color: #928374;
+}
+#custom-notification {
+    color: #fabd2f;
+    padding: 0 8px;
+}
+#custom-notification.notification {
+    color: #fe8019;
+}
+#custom-notification.dnd {
+    color: #928374;
+}
+#custom-notification.dnd-notification {
+    color: #fb4934;
+}

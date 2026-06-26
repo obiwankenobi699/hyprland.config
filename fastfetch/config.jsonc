@@ -78,10 +78,19 @@
       "type": "memory"
     },
     {
-      "key": "Public IP    ",
+      "key": "Local IP     ",
       "keyColor": "cyan",
-      "type": "publicip",
-      "timeout": 1000
+      "type": "localip"
+    },
+    {
+      "key": "Battery      ",
+      "keyColor": "green",
+      "type": "battery"
+    },
+    {
+      "key": "Packages     ",
+      "keyColor": "magenta",
+      "type": "packages"
     },
     "break",
     {

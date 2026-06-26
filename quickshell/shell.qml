@@ -3,6 +3,7 @@
 //@ pragma Env QT_QPA_PLATFORMTHEME=
 
 import "./modules/overview/"
+import "./modules/dashboard/"
 import "./services/"
 import "./common/"
 import "./common/functions/"
@@ -22,4 +23,5 @@ ShellRoot {
     }
 
     Overview {}
+    Dashboard {}
 }
