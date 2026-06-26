@@ -42,6 +42,43 @@ This configuration follows a single-source-of-truth approach where all configura
 
 ## Recent Changes
 
+### Hybrid GPU, Power/Fan Controls, Dashboard & Theme Consistency
+
+**GPU (HP Victus — Intel iGPU + NVIDIA RTX 3050)**
+
+- New `env.conf` (sourced first) sets `AQ_DRM_DEVICES` to render Hyprland on the
+  NVIDIA dGPU, plus Wayland-native toolkit env vars
+- Qt theming enabled safely via `QT_QPA_PLATFORMTHEME=qt6ct` (Kvantum Gruvbox).
+  Note: `QT_STYLE_OVERRIDE=kvantum` is intentionally avoided — it core-dumps KDE
+  apps (systemsettings) with kvantum 1.1.8 + Qt 6.11
+
+**Power & fan controls** (`scripts/`)
+
+- `SUPER+SHIFT+P` — toggle ACPI platform profile balanced ↔ performance
+  (via `power-profiles-daemon` over D-Bus, no sudo)
+- `SUPER+SHIFT+F` — fans MAX ↔ auto for cooling/dust-cleaning (via `nbfc`)
+- Both have live waybar indicators (power profile always shown; fan-max blinks
+  red only when forced)
+
+**Quickshell dashboard** (`SUPER+D`)
+
+- New `quickshell/modules/dashboard/` — a movable floating window with clock,
+  now-playing (playerctl), CPU/RAM/TEMP/BATT/DISK/UPTIME stats, quick toggles
+  (wifi/bt/profile/fan/lock/logout) and volume/brightness sliders
+- Reuses the `scripts/` helpers; Gruvbox-themed, self-contained
+
+**Theme consistency — Gruvbox Dark Hard everywhere**
+
+- Unified GTK (Gruvbox-Retro), cursor (Gruvbox-Retro), Qt icons
+  (Gruvbox-Plus-Dark), Kvantum (opaque Gruvbox), and a new inline Gruvbox
+  `yazi/theme.toml`. Fixed gsettings/qtct/kvantum mismatches
+
+**Repo structure**
+
+- Flattened `waybar` (was a broken phantom submodule) and `wofi` (was a vendored
+  embedded clone) into the single repo so all configs are tracked normally
+- `yazi/` and `Kvantum/` migrated into the repo and symlinked from `~/.config`
+
 ### Configuration Cleanup
 
 **Hyprland Config Consolidation**

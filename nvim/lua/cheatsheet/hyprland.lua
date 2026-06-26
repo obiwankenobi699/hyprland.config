@@ -9,7 +9,7 @@ return {
       { "SUPER + E", "File Manager" },
       { "SUPER + R", "App Launcher" },
       { "SUPER + S", "Screenshot" },
-      { "SUPER + W", "EWW Dashboard" },
+      { "SUPER + D", "Dashboard (Quickshell)" },
     }
   },
   {
@@ -20,7 +20,7 @@ return {
       { "SUPER + F", "Fullscreen" },
       { "SUPER + SPACE", "Toggle floating" },
       { "SUPER + P", "Toggle floating" },
-      { "SUPER + M", "Exit Hyprland" },
+      { "INSERT", "Toggle floating (focused)" },
     }
   },
   {
@@ -63,13 +63,13 @@ return {
     }
   },
   {
-    title = "System",
+    title = "System & Power",
     badge = "system",
     items = {
-      { "Volume Up", "Raise volume" },
-      { "Volume Down", "Lower volume" },
-      { "Brightness Up", "Increase" },
-      { "Brightness Down", "Decrease" },
+      { "Volume Up/Down", "Adjust volume" },
+      { "Brightness Up/Down", "Adjust brightness" },
+      { "SUPER+SHIFT+P", "Power profile (balanced/perf)" },
+      { "SUPER+SHIFT+F", "Fans max <-> auto (cleaning)" },
     }
   },
   {
@@ -86,7 +86,6 @@ return {
     items = {
       { "SUPER + N", "Toggle notifications" },
       { "SUPER+SHIFT+N", "Dismiss all" },
-      { "SUPER + V", "Dashboard" },
     }
   },
   {
@@ -95,8 +94,9 @@ return {
     items = {
       { "SUPER + L", "Lock screen" },
       { "SUPER + O", "Display settings" },
-      { "SUPER + R", "Reload Hyprland" },
       { "SUPER + C", "This cheatsheet" },
+      { "SUPER + TAB", "Workspace overview" },
+      { "SUPER+SHIFT+E", "Exit Hyprland" },
     }
   },
 }
