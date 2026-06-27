@@ -14,6 +14,12 @@ ctx=$(j '.context_window.used_percentage // 0')
 toks=$(j '.context_window.total_input_tokens // 0')
 five=$(j '.rate_limits.five_hour.used_percentage // empty')
 seven=$(j '.rate_limits.seven_day.used_percentage // empty')
+dur=$(j '.cost.total_duration_ms // 0')
+
+# drop a compact metrics snapshot for cc-monitor's session panel to read
+printf '{"cost":%s,"add":%s,"rem":%s,"ctx":%s,"toks":%s,"dur_ms":%s,"model":"%s"}\n' \
+    "${cost:-0}" "${add:-0}" "${rem:-0}" "${ctx:-0}" "${toks:-0}" "${dur:-0}" "$model" \
+    > "$HOME/.claude/metrics.json" 2>/dev/null
 
 # ── Gruvbox (24-bit) ──
 gray=$'\033[38;2;168;153;132m'; green=$'\033[38;2;184;187;38m'
