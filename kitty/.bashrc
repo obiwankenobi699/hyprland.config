@@ -40,9 +40,9 @@ _history_sync() { history -a; history -c; history -r; }
 PROMPT_COMMAND="_history_sync${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
 # ════════════════════════════════════════════════════════════════
-#  FASTFETCH
+#  FASTFETCH  (skipped inside the Claude cockpit — see cc-tmux.sh)
 # ════════════════════════════════════════════════════════════════
-command -v fastfetch &>/dev/null && fastfetch
+[ -z "$CC_COCKPIT" ] && command -v fastfetch &>/dev/null && fastfetch
 
 # ════════════════════════════════════════════════════════════════
 #  BLE.SH

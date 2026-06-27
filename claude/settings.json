@@ -1,5 +1,38 @@
 {
   "model": "opus",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ": > ~/.claude/activity.log && date +%s > ~/.claude/session-start"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/hypr/scripts/cc-log-prompt.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/hypr/scripts/cc-log-activity.sh"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline-gruvbox.sh",
@@ -8,16 +41,5 @@
   "outputStyle": "Gruvbox Rich",
   "effortLevel": "high",
   "tui": "fullscreen",
-  "theme": "custom:obi",
-  "hooks": {
-    "SessionStart": [
-      { "hooks": [ { "type": "command", "command": ": > ~/.claude/activity.log && date +%s > ~/.claude/session-start" } ] }
-    ],
-    "UserPromptSubmit": [
-      { "hooks": [ { "type": "command", "command": "~/.config/hypr/scripts/cc-log-prompt.sh" } ] }
-    ],
-    "PostToolUse": [
-      { "matcher": "*", "hooks": [ { "type": "command", "command": "~/.config/hypr/scripts/cc-log-activity.sh" } ] }
-    ]
-  }
+  "theme": "custom:obi"
 }

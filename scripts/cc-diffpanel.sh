@@ -24,4 +24,4 @@ if [ -z "$repo" ]; then
 fi
 [ -z "$repo" ] && repo="$HOME/.config/hypr"
 
-kitty --class "$class" --directory "$repo" -e lazygit
+kitty -o background_opacity=1.0 --class "$class" --directory "$repo" -e lazygit
