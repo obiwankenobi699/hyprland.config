@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # cc-tmux.sh — Claude Code "cockpit" tmux layout, per project.
 #
-#   ┌──────────────────┬──────────────┐
-#   │  Claude (chat)   │ cc-monitor   │   left  = conversation
-#   │  ~60%            ├──────────────┤   right = everything Claude touched
-#   │                  │ lazygit      │          (activity feed, diff, shell)
-#   │                  ├──────────────┤
-#   │                  │ shell        │
-#   └──────────────────┴──────────────┘
+#   ┌────────────────────┬────────────┐
+#   │  Claude (chat)     │ cockpit    │   left  = conversation (~68%)
+#   │  ~68%              │ dashboard  │   right = live STATE + shell
+#   │                    ├────────────┤
+#   │                    │ shell      │   lazygit → prefix + g  (popup)
+#   └────────────────────┴────────────┘   palette → Alt+Space   (popup)
 #
 # Picks a project with fzf (fallback: numbered menu), names the tmux session
 # after it, and re-attaches if that session already exists — so the same
@@ -66,15 +65,28 @@ attach() { if [ -n "$TMUX" ]; then tmux switch-client -t "$name"; else tmux atta
 tmux has-session -t "$name" 2>/dev/null && { attach; exit 0; }
 
 # ── build the cockpit ──
-tmux new-session -d -s "$name" -c "$proj" -n dev
+# CC_COCKPIT=1 → panes' .bashrc skips fastfetch (stays in the startup path for
+# normal terminals only). -e sets it for the very first pane too.
+tmux new-session -d -s "$name" -c "$proj" -n dev -e CC_COCKPIT=1
 
-# pane 0 = Claude (left); carve a 40% column on the right
-tmux send-keys     -t "$name:dev.0" 'claude' C-m
-tmux split-window  -h -l 40% -t "$name:dev.0" -c "$proj"   # pane 1 (right, top)
-tmux send-keys     -t "$name:dev.1" "$SCRIPTS/cc-monitor.sh" C-m
-tmux split-window  -v -l 67% -t "$name:dev.1" -c "$proj"   # pane 2 (right, mid)
-tmux send-keys     -t "$name:dev.2" 'lazygit' C-m
-tmux split-window  -v -l 50% -t "$name:dev.2" -c "$proj"   # pane 3 (right, bottom = shell)
+# pane 0 = Claude (left, ~68%)
+tmux send-keys -t "$name:dev.0" 'claude' C-m
+
+# record the Claude pane so Mission Control can type recalled prompts into it
+claude_pane=$(tmux list-panes -t "$name:dev" -F '#{pane_id}' | head -1)
+tmux set-environment -t "$name" CLAUDE_PANE "$claude_pane"
+
+# pane 1 = STATE dashboard (right column, ~32% wide, top ~55%)
+tmux split-window -h -l 32% -t "$name:dev.0" -c "$proj"
+tmux send-keys    -t "$name:dev.1" "$SCRIPTS/cc-monitor.sh" C-m
+
+# pane 2 = shell (right column, bottom ~45%)  — lazygit is now prefix+g popup
+tmux split-window -v -l 45% -t "$name:dev.1" -c "$proj" -e CC_COCKPIT=1
+
+# labeled pane headers (shown by pane-border-status — clear separation)
+tmux select-pane -t "$name:dev.0" -T " 󰚩 claude "
+tmux select-pane -t "$name:dev.1" -T " 󰕮 cockpit "
+tmux select-pane -t "$name:dev.2" -T "  shell "
 
 tmux select-pane -t "$name:dev.0"
 attach
