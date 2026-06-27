@@ -1,0 +1,20 @@
+{
+  "model": "opus",
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline-gruvbox.sh",
+    "padding": 0
+  },
+  "outputStyle": "Gruvbox Rich",
+  "effortLevel": "high",
+  "tui": "fullscreen",
+  "theme": "custom:obi",
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": ": > ~/.claude/activity.log" } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "*", "hooks": [ { "type": "command", "command": "~/.config/hypr/scripts/cc-log-activity.sh" } ] }
+    ]
+  }
+}

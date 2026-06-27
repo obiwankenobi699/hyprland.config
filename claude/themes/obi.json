@@ -1,0 +1,48 @@
+{
+  "name": "Obi",
+  "base": "dark",
+  "overrides": {
+    "claude": "#fe8019",
+    "claudeShimmer": "#fabd2f",
+    "text": "#ebdbb2",
+    "inverseText": "#1d2021",
+    "inactive": "#928374",
+    "subtle": "#504945",
+    "suggestion": "#a89984",
+    "remember": "#d3869b",
+    "background": "#1d2021",
+
+    "success": "#b8bb26",
+    "error": "#fb4934",
+    "warning": "#fabd2f",
+    "merged": "#d3869b",
+
+    "promptBorder": "#83a598",
+    "permission": "#d3869b",
+    "planMode": "#8ec07c",
+    "autoAccept": "#b8bb26",
+    "bashBorder": "#fe8019",
+    "ide": "#83a598",
+    "fastMode": "#fe8019",
+
+    "diffAdded": "#34381b",
+    "diffRemoved": "#3c1f1d",
+    "diffAddedDimmed": "#282a16",
+    "diffRemovedDimmed": "#2c1817",
+    "diffAddedWord": "#b8bb26",
+    "diffRemovedWord": "#fb4934",
+
+    "userMessageBackground": "#3c3836",
+    "userMessageBackgroundHover": "#504945",
+    "messageActionsBackground": "#282828",
+    "bashMessageBackgroundColor": "#282828",
+    "memoryBackgroundColor": "#32302f",
+    "selectionBg": "#504945",
+
+    "rate_limit_fill": "#fe8019",
+    "rate_limit_empty": "#3c3836",
+
+    "briefLabelYou": "#83a598",
+    "briefLabelClaude": "#fe8019"
+  }
+}
