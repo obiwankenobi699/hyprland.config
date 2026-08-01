@@ -14,7 +14,7 @@ return function(home, programs)
     bind("S", exec(programs.screenshot))
     bind("N", exec("swaync-client -t"))
     hl.bind(main_mod .. " + SHIFT + N", exec("swaync-client -d"))
-    bind("W", exec("waypaper"))
+    bind("W", exec("sh -c 'waypaper; " .. home .. "/.config/hypr/scripts/lock-wallpaper-sync.sh'"))
 
     bind("Q", hl.dsp.window.close())
     bind("F", hl.dsp.window.fullscreen({ action = "toggle" }))
