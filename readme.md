@@ -2,6 +2,12 @@
 
 A clean, modular Wayland desktop environment built on Hyprland with unified Gruvbox theming and centralized configuration management.
 
+> Current configuration note: Hyprland 0.56 uses `hyprland.lua` and the modules in
+> `config/`. Older `.conf` source-chain examples later in this document are historical
+> reference material and are not the active entrypoint. `hypridle.conf` and
+> `hyprlock.conf` remain daemon-specific configs; no `hyprland.conf` or `hyprpaper.conf`
+> is used.
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -153,15 +159,15 @@ Verification: `ls -la ~/.config/ | grep '\->'`
 
 ```
 ~/.config/hypr/
-├── hyprland.conf              # Main configuration entry point
-├── hyprland(Best).conf        # Backup/alternative configuration
-├── autostart.conf             # Startup services
-├── keybinds.conf              # Keyboard shortcuts
-├── keybinds.conf.bak.*        # Keybind backups
-├── monitors.conf              # Display configuration
-├── variables.conf             # Environment variables
-├── windowrules.conf           # Window-specific rules
-├── hyprpaper.conf             # Wallpaper daemon config
+├── hyprland.lua               # Hyprland 0.56+ entry point
+├── init.lua                    # Module loader and shared commands
+├── config/                     # Lua compositor modules
+│   ├── environment.lua
+│   ├── monitors.lua
+│   ├── autostart.lua
+│   ├── appearance.lua
+│   ├── keybinds.lua
+│   └── rules.lua
 ├── readme.md                  # This file
 │
 ├── battery-notify/
@@ -1175,5 +1181,3 @@ hyprctl reload
 This configuration is provided as-is for personal use. Individual components may have their own licenses.
 
 ---
-
-

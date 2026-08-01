@@ -1,0 +1,13 @@
+return function(home)
+    hl.on("hyprland.start", function()
+        hl.exec_cmd("awww-daemon")
+        hl.exec_cmd("waypaper --restore")
+        hl.exec_cmd("swaync")
+        hl.exec_cmd("nm-applet")
+        hl.exec_cmd("xsettingsd")
+        hl.exec_cmd("waybar")
+        hl.exec_cmd("qs -c " .. home .. "/.config/quickshell")
+        hl.exec_cmd("hypridle")
+        hl.exec_cmd("sh -c 'while true; do " .. home .. "/.config/hypr/scripts/battery_notify.sh; sleep 60; done'")
+    end)
+end

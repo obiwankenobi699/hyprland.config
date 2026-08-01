@@ -320,3 +320,4 @@ nodev()   { nvm use "$1" && node --version; }
 whichpy() { echo "$(which python3)  $(python3 --version)  pyenv:$(pyenv version-name 2>/dev/null)"; }
 javainfo(){ echo "$(java -version 2>&1 | head -1)  JAVA_HOME=$JAVA_HOME"; }
 showpath(){ echo "$PATH" | tr ':' '\n' | nl; }
+eval "$(mise activate bash)"

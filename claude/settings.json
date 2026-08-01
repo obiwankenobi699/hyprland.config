@@ -1,5 +1,4 @@
 {
-  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
@@ -41,5 +40,6 @@
   "outputStyle": "Gruvbox Rich",
   "effortLevel": "high",
   "tui": "fullscreen",
-  "theme": "custom:obi"
+  "theme": "custom:obi",
+  "model": "opus"
 }
