@@ -59,34 +59,78 @@ fi
 # tmux session name = sanitized basename
 name=$(basename "$proj" | tr -c 'a-zA-Z0-9_' '_')
 
-attach() { if [ -n "$TMUX" ]; then tmux switch-client -t "$name"; else tmux attach -t "$name"; fi; }
+attach() {
+    if [ -n "$TMUX" ]; then
+        tmux switch-client -t "$name"
+    else
+        tmux attach -t "$name"
+    fi
+}
 
-# already running? just go to it
-tmux has-session -t "$name" 2>/dev/null && { attach; exit 0; }
+# Reuse a complete cockpit, but do not treat an old/restored partial session
+# as healthy. Resurrect can restore a session after one of its panes exited;
+# in that case create a new cockpit window without destroying the old work.
+window=dev
+if tmux has-session -t "$name" 2>/dev/null; then
+    complete_window=""
+    while read -r candidate pane_count; do
+        case "$candidate" in
+            dev|cockpit|cockpit-[0-9]*) ;;
+            *) continue ;;
+        esac
+
+        if [ "$pane_count" -eq 3 ] &&
+            ! tmux list-panes -t "$name:$candidate" -F '#{pane_dead}' | grep -Fxq 1; then
+            complete_window=$candidate
+            break
+        fi
+    done < <(tmux list-windows -t "$name" -F '#{window_name} #{window_panes}')
+
+    if [ -n "$complete_window" ]; then
+        tmux select-window -t "$name:$complete_window"
+        attach
+        exit 0
+    fi
+
+    window=cockpit
+    suffix=1
+    while tmux list-windows -t "$name" -F '#{window_name}' | grep -Fxq "$window"; do
+        window="cockpit-$suffix"
+        suffix=$((suffix + 1))
+    done
+fi
 
 # ── build the cockpit ──
 # CC_COCKPIT=1 → panes' .bashrc skips fastfetch (stays in the startup path for
 # normal terminals only). -e sets it for the very first pane too.
-tmux new-session -d -s "$name" -c "$proj" -n dev -e CC_COCKPIT=1
+if tmux has-session -t "$name" 2>/dev/null; then
+    claude_pane=$(tmux new-window -d -t "$name:" -n "$window" -c "$proj" -e CC_COCKPIT=1 -P -F '#{pane_id}')
+else
+    claude_pane=$(tmux new-session -d -s "$name" -c "$proj" -n "$window" -e CC_COCKPIT=1 -P -F '#{pane_id}')
+fi
+tmux set-option -w -t "$name:$window" remain-on-exit on
 
-# pane 0 = Claude (left, ~68%)
-tmux send-keys -t "$name:dev.0" 'claude' C-m
+# Capture pane IDs rather than assuming numeric indexes. The active tmux
+# configuration uses pane-base-index 1, and pane IDs remain stable as splits
+# are created.
+# Claude (left, ~68%)
+tmux send-keys -t "$claude_pane" 'claude' C-m
 
 # record the Claude pane so Mission Control can type recalled prompts into it
-claude_pane=$(tmux list-panes -t "$name:dev" -F '#{pane_id}' | head -1)
 tmux set-environment -t "$name" CLAUDE_PANE "$claude_pane"
 
-# pane 1 = STATE dashboard (right column, ~32% wide, top ~55%)
-tmux split-window -h -l 32% -t "$name:dev.0" -c "$proj"
-tmux send-keys    -t "$name:dev.1" "$SCRIPTS/cc-monitor.sh" C-m
+# STATE dashboard (right column, ~32% wide, top ~55%)
+cockpit_pane=$(tmux split-window -h -l 32% -t "$claude_pane" -c "$proj" -P -F '#{pane_id}')
+tmux send-keys -t "$cockpit_pane" "$SCRIPTS/cc-monitor.sh" C-m
 
-# pane 2 = shell (right column, bottom ~45%)  — lazygit is now prefix+g popup
-tmux split-window -v -l 45% -t "$name:dev.1" -c "$proj" -e CC_COCKPIT=1
+# shell (right column, bottom ~45%) — lazygit is now prefix+g popup
+shell_pane=$(tmux split-window -v -l 45% -t "$cockpit_pane" -c "$proj" -e CC_COCKPIT=1 -P -F '#{pane_id}')
 
 # labeled pane headers (shown by pane-border-status — clear separation)
-tmux select-pane -t "$name:dev.0" -T " 󰚩 claude "
-tmux select-pane -t "$name:dev.1" -T " 󰕮 cockpit "
-tmux select-pane -t "$name:dev.2" -T "  shell "
+tmux select-pane -t "$claude_pane" -T " 󰚩 claude "
+tmux select-pane -t "$cockpit_pane" -T " 󰕮 cockpit "
+tmux select-pane -t "$shell_pane" -T "  shell "
 
-tmux select-pane -t "$name:dev.0"
+tmux select-window -t "$name:$window"
+tmux select-pane -t "$claude_pane"
 attach

@@ -2,9 +2,9 @@ local home = os.getenv("HOME")
 
 local programs = {
     terminal = "kitty",
-    file_manager = "thunar",
+    file_manager = "dolphin",
     menu = "wofi --show drun",
-    browser = "firefox",
+    browser = "zen-browser",
     screenshot = "grimblast copysave area " .. home .. "/Pictures/screenshot/$(date +'%Y-%m-%d_%H-%M-%S_grim.png')",
 }
 

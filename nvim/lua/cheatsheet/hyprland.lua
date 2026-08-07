@@ -51,6 +51,7 @@ return {
       { "SUPER+CTRL+L", "Resize right" },
       { "SUPER+CTRL+K", "Resize up" },
       { "SUPER+CTRL+J", "Resize down" },
+      { "SUPER+ALT+H/J/K/L", "Fine resize (10px)" },
     }
   },
   {
@@ -69,6 +70,7 @@ return {
       { "Volume Up/Down", "Adjust volume" },
       { "Brightness Up/Down", "Adjust brightness" },
       { "SUPER+SHIFT+P", "Power profile (balanced/perf)" },
+      { "SUPER+ALT+P", "Power profile (compatibility alias)" },
       { "SUPER+SHIFT+F", "Fans max <-> auto (cleaning)" },
     }
   },
@@ -93,6 +95,8 @@ return {
     badge = "misc",
     items = {
       { "SUPER + L", "Lock screen" },
+      { "SUPER + ESCAPE", "Lock screen" },
+      { "SUPER + SHIFT + ESCAPE", "Logout menu" },
       { "SUPER + O", "Display settings" },
       { "SUPER + C", "This cheatsheet" },
       { "SUPER + TAB", "Workspace overview" },

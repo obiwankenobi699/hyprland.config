@@ -14,7 +14,8 @@ return function(home, programs)
     bind("S", exec(programs.screenshot))
     bind("N", exec("swaync-client -t"))
     hl.bind(main_mod .. " + SHIFT + N", exec("swaync-client -d"))
-    bind("W", exec("sh -c 'waypaper; " .. home .. "/.config/hypr/scripts/lock-wallpaper-sync.sh'"))
+    bind("W", exec("waypaper"))
+    hl.bind(main_mod .. " + SHIFT + W", exec(home .. "/.config/hypr/scripts/lock-wallpaper-select.sh"))
 
     bind("Q", hl.dsp.window.close())
     bind("F", hl.dsp.window.fullscreen({ action = "toggle" }))
@@ -32,6 +33,10 @@ return function(home, programs)
 
     for key, delta in pairs({ H = { x = -40, y = 0 }, L = { x = 40, y = 0 }, K = { x = 0, y = -40 }, J = { x = 0, y = 40 } }) do
         hl.bind(main_mod .. " + CTRL + " .. key, hl.dsp.window.resize({ x = delta.x, y = delta.y, relative = true }), { repeating = true })
+    end
+
+    for key, delta in pairs({ H = { x = -10, y = 0 }, L = { x = 10, y = 0 }, K = { x = 0, y = -10 }, J = { x = 0, y = 10 } }) do
+        hl.bind(main_mod .. " + ALT + " .. key, hl.dsp.window.resize({ x = delta.x, y = delta.y, relative = true }), { repeating = true })
     end
 
     for i = 1, 10 do
@@ -54,11 +59,14 @@ return function(home, programs)
     hl.bind(main_mod .. " + SHIFT + S", exec("grimblast copy area"))
     hl.bind(main_mod .. " + CTRL + S", exec("grimblast save screen"))
     bind("O", exec("wlr-randr"))
-    bind("L", exec("hyprlock"))
+    bind("L", exec(home .. "/.config/hypr/scripts/lock-screen.sh"))
+    hl.bind(main_mod .. " + ESCAPE", exec("hyprlock"))
+    hl.bind(main_mod .. " + SHIFT + ESCAPE", exec("wlogout"))
     hl.bind(main_mod .. " + SHIFT + E", hl.dsp.exit())
 
     bind("D", exec("qs ipc call dashboard toggle"))
     bind("C", exec("kitty --class cheatsheet -e nvim +HyprCheat"))
+    hl.bind(main_mod .. " + SHIFT + P", exec(home .. "/.config/hypr/scripts/toggle-profile.sh"))
     hl.bind(main_mod .. " + ALT + P", exec(home .. "/.config/hypr/scripts/toggle-profile.sh"))
     hl.bind(main_mod .. " + SHIFT + F", exec(home .. "/.config/hypr/scripts/fan-max.sh"))
     hl.bind(main_mod .. " + SHIFT + A", exec("kitty -o background_opacity=1.0 --class cc-monitor -e " .. home .. "/.config/hypr/scripts/cc-monitor.sh"))

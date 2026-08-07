@@ -46,10 +46,20 @@ check_proc() { # name  pgrep-args...
     local label=$1; shift
     if pgrep "$@" >/dev/null 2>&1; then ok "$label"; else bad "$label — not running"; fi
 }
+check_optional_proc() { # command label pgrep-args...
+    local command=$1 label=$2; shift 2
+    if ! command -v "$command" >/dev/null 2>&1; then
+        wn "$label — not installed (optional)"
+    elif pgrep "$@" >/dev/null 2>&1; then
+        ok "$label"
+    else
+        bad "$label — installed but not running"
+    fi
+}
 check_proc "awww-daemon (wallpaper)" -x awww-daemon
 check_proc "swaync (notifications)" -x swaync
 check_proc "nm-applet (network)"  -x nm-applet
-check_proc "xsettingsd"           -x xsettingsd
+check_optional_proc "xsettingsd" "xsettingsd" -x xsettingsd
 check_proc "waybar"               -x waybar
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
     ok "quickshell (overview)"; else bad "quickshell (overview) — not running"; fi
@@ -80,9 +90,14 @@ fi
 
 # ── 4. dpms wake options ──────────────────────────────
 head "DPMS wake (screen-won't-relight guard)"
-getopt_int() { hyprctl getoption "misc:$1" 2>/dev/null | awk '/^int:/{print $2; exit}'; }
+getopt_bool() {
+    hyprctl getoption "misc:$1" 2>/dev/null | awk '
+        /^bool:/ { print $2 == "true" ? 1 : 0; exit }
+        /^int:/  { print $2; exit }
+    '
+}
 for opt in mouse_move_enables_dpms key_press_enables_dpms; do
-    v=$(getopt_int "$opt")
+    v=$(getopt_bool "$opt")
     if [ "$v" = "1" ]; then ok "misc:$opt = true"
     else wn "misc:$opt = ${v:-unset} — input may not wake the display"; fi
 done

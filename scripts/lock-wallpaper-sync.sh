@@ -1,30 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-waypaper_config="${XDG_CONFIG_HOME:-$HOME/.config}/waypaper/config.ini"
 lock_cache="${XDG_CACHE_HOME:-$HOME/.cache}/hypr"
-lock_wallpaper="$lock_cache/lock-wallpaper"
 
-if [[ ! -r "$waypaper_config" ]]; then
-    printf 'Waypaper config not found: %s\n' "$waypaper_config" >&2
-    exit 1
+if [[ $# -ne 2 ]]; then
+    printf 'Usage: %s MONITOR IMAGE_PATH\n' "$0" >&2
+    exit 2
 fi
 
-wallpaper=$(awk -F= '
-    /^[[:space:]]*wallpaper[[:space:]]*=/ {
-        value = $2
-        sub(/^[[:space:]]+/, "", value)
-        sub(/[[:space:]]+$/, "", value)
-        print value
-        exit
-    }
-' "$waypaper_config")
-
-case "$wallpaper" in
-    "~/"*) wallpaper="$HOME/${wallpaper:2}" ;;
-    /*) ;;
-    *) wallpaper="$(dirname "$waypaper_config")/$wallpaper" ;;
+monitor=$1
+wallpaper=$2
+case "$monitor" in
+    eDP-1|HDMI-A-1) ;;
+    *) printf 'Unsupported monitor: %s\n' "$monitor" >&2; exit 2 ;;
 esac
+
+lock_wallpaper="$lock_cache/lock-wallpaper-$monitor"
+
+if [[ "$wallpaper" == "~/"* ]]; then
+    wallpaper="$HOME/${wallpaper:2}"
+fi
 
 if [[ -z "$wallpaper" || ! -f "$wallpaper" ]]; then
     printf 'Waypaper wallpaper does not exist: %s\n' "${wallpaper:-<empty>}" >&2
