@@ -1,13 +1,21 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 36,
+    "height": 32,
     "margin-top": 4,
     "margin-left": 12,
     "margin-right": 12,
     "modules-left": ["hyprland/workspaces", "hyprland/submap"],
     "modules-center": ["clock"],
-    "modules-right": ["custom/fanmax", "custom/notification", "custom/powerprofile", "pulseaudio", "battery", "network", "tray", "custom/power"],
+    "modules-right": ["custom/updates", "custom/fanmax", "custom/notification", "custom/powerprofile", "pulseaudio", "battery", "network", "tray", "custom/power"],
+
+    "custom/updates": {
+        "return-type": "json",
+        "exec": "~/.config/hypr/scripts/update-status.sh",
+        "interval": 3600,
+        "tooltip": true,
+        "on-click": "kitty -e yay -Syu"
+    },
 
     "custom/power": {
         "format": "󰐥",

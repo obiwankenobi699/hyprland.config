@@ -1,4 +1,4 @@
-/* Gruvbox Dark — Waybar (pill redesign) */
+/* Gruvbox Dark — Waybar (continuous bar redesign) */
 @keyframes blink {
     to { color: #fbf1c7; }
 }
@@ -10,11 +10,12 @@
     min-height: 0;
 }
 window#waybar {
-    background-color: transparent;
+    background-color: #1d2021;
+    border-bottom: 1px solid #3c3836;
     color: #ebdbb2;
 }
 
-/* ── Each module = rounded pill ── */
+/* ── Continuous bar modules ── */
 #workspaces,
 #submap,
 #clock,
@@ -25,24 +26,25 @@ window#waybar {
 #custom-notification,
 #custom-powerprofile,
 #custom-fanmax,
+#custom-updates,
 #custom-power {
-    background-color: #282828;
-    border: 1px solid #3c3836;
-    border-radius: 10px;
-    padding: 1px 12px;
-    margin: 5px 3px;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 10px;
+    margin: 0;
     transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* ── Workspaces ── */
 #workspaces {
-    padding: 1px 4px;
+    padding: 0 6px;
 }
 #workspaces button {
     color: #a89984;
     padding: 0 8px;
-    margin: 2px 1px;
-    border-radius: 8px;
+    margin: 0 1px;
+    border-radius: 0;
     transition: all 0.2s ease;
 }
 #workspaces button:hover {
@@ -51,14 +53,14 @@ window#waybar {
 }
 #workspaces button.active,
 #workspaces button.focused {
-    background-color: #fe8019;
-    color: #1d2021;
+    background-color: transparent;
+    color: #83a598;
     font-weight: bold;
-    padding: 0 14px;
+    padding: 0 8px;
 }
 #workspaces button.urgent {
-    background-color: #fb4934;
-    color: #1d2021;
+    background-color: transparent;
+    color: #fb4934;
 }
 
 #submap {
@@ -99,6 +101,18 @@ window#waybar {
 #custom-powerprofile.power-saver { color: #b8bb26; }
 #custom-powerprofile.unknown { color: #928374; }
 
+#custom-updates.pending { color: #fe8019; }
+#custom-updates.unavailable { color: #928374; }
+
+/* Separate status, connectivity, and tray/session groups. */
+#custom-powerprofile,
+#network,
+#tray {
+    border-right: 1px solid #504945;
+    margin-right: 12px;
+    padding-right: 14px;
+}
+
 #custom-fanmax.max {
     color: #fb4934;
     font-weight: bold;
@@ -109,7 +123,7 @@ window#waybar {
     animation-direction: alternate;
 }
 #custom-fanmax.auto {
-    padding: 0;
+    padding: 0 10px;
     margin: 0;
     border: none;
     background-color: transparent;
@@ -118,7 +132,7 @@ window#waybar {
 /* ── Power / session button ── */
 #custom-power {
     color: #fb4934;
-    padding: 1px 14px;
+    padding: 0 14px;
 }
 #custom-power:hover {
     background-color: #fb4934;

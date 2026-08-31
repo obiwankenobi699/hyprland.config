@@ -874,6 +874,18 @@ hyprctl clients
 
 ## Keybindings
 
+### Display modes
+
+Display modes are available through `SUPER+CTRL+1..2`, or `SUPER+SHIFT+M` for
+the Wofi picker:
+
+- `1` Standard
+- `2` Black & White
+
+Standard uses a neutral `hyprsunset` identity transform. Black & White uses
+the whole-display `hyprshade` grayscale shader. Install the Arch package with
+`paru -S hyprshade` if it is not already installed.
+
 ### Quick Reference
 
 #### Window Management

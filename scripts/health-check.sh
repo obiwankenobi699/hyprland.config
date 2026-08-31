@@ -75,14 +75,43 @@ if command -v hyprctl >/dev/null; then
     done < <(hyprctl monitors 2>/dev/null | awk '
         /^Monitor/ {name=$2}
         /^\t[0-9]+x[0-9]+@/ {gsub(/^\t/,""); print name": "$0}')
-    # flag any monitor whose active mode is not its highest available one
+    # Flag any monitor whose active mode is below its best resolution/refresh.
     while read -r mon; do
         cur=$(hyprctl monitors 2>/dev/null | awk -v m="$mon" '
             $0 ~ "Monitor "m" " {f=1} f && /^\t[0-9]+x[0-9]+@/ {print $1; exit}')
         best=$(hyprctl monitors all 2>/dev/null | awk -v m="$mon" '
-            $0 ~ "Monitor "m" " {f=1} f && /availableModes/ {print $2; exit}')
-        [ -n "$best" ] && [ -n "$cur" ] && [ "${cur%@*}" != "${best%@*}" ] \
-            && wn "$mon running ${cur%@*}, native max is ${best%@*}"
+            $0 ~ "Monitor "m" " {f=1; next}
+            f && /^Monitor / {exit}
+            f && /availableModes/ {
+                for (i=2; i<=NF; i++) {
+                    mode=$i
+                    sub(/Hz$/, "", mode)
+                    split(mode, parts, "@")
+                    split(parts[1], size, "x")
+                    area=size[1] * size[2]
+                    hz=parts[2] + 0
+                    if (area > best_area || (area == best_area && hz > best_hz)) {
+                        best_area=area
+                        best_hz=hz
+                        best_mode=mode
+                    }
+                }
+            }
+            END {print best_mode}')
+
+        if [ -n "$best" ] && [ -n "$cur" ]; then
+            cur_resolution=${cur%@*}
+            best_resolution=${best%@*}
+            cur_refresh=${cur#*@}
+            best_refresh=${best#*@}
+
+            if [ "$cur_resolution" != "$best_resolution" ]; then
+                wn "$mon running $cur_resolution, best available is $best_resolution"
+            elif awk -v current="$cur_refresh" -v best="$best_refresh" \
+                'BEGIN { exit !(best - current > 0.5) }'; then
+                wn "$mon running ${cur_refresh}Hz, best available is ${best_refresh}Hz"
+            fi
+        fi
     done < <(hyprctl monitors 2>/dev/null | awk '/^Monitor/{print $2}')
 else
     bad "cannot query monitors (no hyprctl)"

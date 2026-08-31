@@ -1,0 +1,66 @@
+[cpu.usage]
+direction = "high"
+warning = 90
+critical = 98
+warning_reason = "CPU utilization is sustained above the expected range"
+critical_reason = "CPU utilization is saturated"
+
+[ram.usage]
+direction = "high"
+warning = 85
+critical = 95
+warning_reason = "Available memory is running low"
+critical_reason = "Memory pressure is critically high"
+
+[storage.disk_usage]
+direction = "high"
+warning = 80
+critical = 95
+warning_reason = "Root filesystem is nearly full; this is a space warning, not SSD wear"
+critical_reason = "Root filesystem has critically little free space"
+
+[battery.charge]
+diagnostic = false
+warning = 0
+critical = 0
+
+[battery.health]
+direction = "low"
+warning = 80
+critical = 60
+warning_reason = "Battery full-charge capacity has degraded"
+critical_reason = "Battery full-charge capacity is severely degraded"
+
+[battery.start_threshold]
+diagnostic = false
+warning = 0
+critical = 0
+
+[battery.end_threshold]
+diagnostic = false
+warning = 0
+critical = 0
+
+[thermal.cpu_temperature]
+direction = "high"
+warning = 85
+critical = 95
+warning_reason = "CPU temperature is above the expected operating range"
+critical_reason = "CPU temperature is critically high"
+
+[network.link_state]
+direction = "low"
+warning = 0.5
+critical = 0.0
+warning_reason = "The default network interface is down"
+critical_reason = "No active default network link is available"
+
+[kernel.failed_units]
+direction = "high"
+warning = 1
+critical = 3
+warning_reason = "A systemd unit has failed"
+critical_reason = "Multiple systemd units have failed"
+
+[kernel.version]
+diagnostic = false

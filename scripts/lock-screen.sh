@@ -21,7 +21,7 @@ case "$choice" in
         trap cleanup EXIT INT TERM
 
         awk -v target="$choice" '
-            function flush_block(    i, line, monitor, keep) {
+            function flush_block(    i, line, monitor) {
                 monitor = ""
                 for (i = 1; i <= block_length; i++) {
                     line = block[i]
@@ -31,10 +31,12 @@ case "$choice" in
                     }
                 }
 
-                # Render backgrounds only on the selected output. An empty
-                # monitor value means every monitor in Hyprlock.
-                keep = block_type != "background" || monitor == target
-                if (keep) {
+                if (block_type == "background" && monitor != target) {
+                    print "background {"
+                    print "    monitor = " monitor
+                    print "    color = rgba(000000ff)"
+                    print "}"
+                } else {
                     for (i = 1; i <= block_length; i++) {
                         line = block[i]
                         if (block_type != "background" && line ~ /^[[:space:]]*monitor[[:space:]]*=[[:space:]]*$/)

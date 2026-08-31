@@ -41,7 +41,6 @@ require("lazy").setup({
 -- Load theme (Base46)
 -----------------------------------------------------------
 dofile(vim.g.base46_cache .. "defaults")
-vim.cmd.colorscheme("cendre")
 dofile(vim.g.base46_cache .. "statusline")
 
 -----------------------------------------------------------

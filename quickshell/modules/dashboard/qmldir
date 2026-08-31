@@ -1,6 +1,7 @@
 singleton Theme 1.0 Theme.qml
 Dashboard 1.0 Dashboard.qml
 StatsPanel 1.0 StatsPanel.qml
+DiagnosticsPage 1.0 DiagnosticsPage.qml
 ControlsPanel 1.0 ControlsPanel.qml
 NowPlaying 1.0 NowPlaying.qml
 Weather 1.0 Weather.qml

@@ -1,0 +1,19 @@
+[Unit]
+Description=Read-only system diagnostics daemon
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.config/hypr/diagnosticsd
+ExecStart=/usr/bin/python3 -m diagnosticsd
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.config/diagnosticsd %h/.local/share/diagnosticsd
+
+[Install]
+WantedBy=default.target
