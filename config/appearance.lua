@@ -36,9 +36,11 @@ return function()
         },
         animations = { enabled = true },
         dwindle = {
+            force_split = 2,
             preserve_split = true,
+            precise_mouse_move = true,
             split_width_multiplier = 1.3,
-            smart_split = true,
+            smart_split = false,
             smart_resizing = true,
         },
         master = { new_on_top = true },
@@ -47,12 +49,10 @@ return function()
             disable_splash_rendering = true,
             mouse_move_enables_dpms = true,
             key_press_enables_dpms = true,
-            focus_on_activate = true,
+            focus_on_activate = false,
         },
         debug = { vfr = true },
     })
-
-    hl.animation({ leaf = "borderangle", enabled = true, speed = 60, bezier = "default", style = "loop" })
 
     hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
     hl.gesture({

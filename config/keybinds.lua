@@ -19,9 +19,16 @@ return function(home, programs)
 
     bind("Q", hl.dsp.window.close())
     bind("F", hl.dsp.window.fullscreen({ action = "toggle" }))
-    bind("P", hl.dsp.window.float({ action = "toggle" }))
+    bind("P", hl.dsp.window.pseudo({ action = "toggle" }))
+    bind("V", hl.dsp.layout("togglesplit"))
     bind("Return", exec(programs.terminal))
     bind("Space", hl.dsp.window.float({ action = "toggle" }))
+    bind("grave", hl.dsp.workspace.toggle_special("scratchpad"))
+    hl.bind(main_mod .. " + SHIFT + V", hl.dsp.layout("swapsplit"))
+    hl.bind(main_mod .. " + SHIFT + grave", hl.dsp.window.move({
+        workspace = "special:scratchpad",
+        follow = false,
+    }))
 
     for key, direction in pairs({ left = "l", right = "r", up = "u", down = "d" }) do
         bind(key, hl.dsp.focus({ direction = direction }))
@@ -66,6 +73,7 @@ return function(home, programs)
 
     bind("D", exec("qs ipc call dashboard toggle"))
     bind("C", exec("kitty --class cheatsheet -e nvim +HyprCheat"))
+    bind("U", exec("kitty --class system-maintenance -e " .. home .. "/.config/hypr/scripts/system-update.sh"))
     hl.bind(main_mod .. " + SHIFT + P", exec(home .. "/.config/hypr/scripts/toggle-profile.sh"))
     hl.bind(main_mod .. " + ALT + P", exec(home .. "/.config/hypr/scripts/toggle-profile.sh"))
     hl.bind(main_mod .. " + CTRL + 1", exec(home .. "/.config/hypr/scripts/display-mode.sh standard"))

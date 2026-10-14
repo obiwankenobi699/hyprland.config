@@ -19,7 +19,11 @@ return {
       { "SUPER + Q", "Kill window" },
       { "SUPER + F", "Fullscreen" },
       { "SUPER + SPACE", "Toggle floating" },
-      { "SUPER + P", "Toggle floating" },
+      { "SUPER + P", "Toggle pseudo-tiling" },
+      { "SUPER + V", "Rotate current split" },
+      { "SUPER+SHIFT+V", "Swap split children" },
+      { "SUPER + `", "Show scratchpad" },
+      { "SUPER+SHIFT+`", "Send window to scratchpad" },
       { "INSERT", "Toggle floating (focused)" },
     }
   },
