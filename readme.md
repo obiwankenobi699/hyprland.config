@@ -892,14 +892,18 @@ the whole-display `hyprshade` grayscale shader. Install the Arch package with
 
 | Keybind | Action |
 |---------|--------|
-| `SUPER + H/J/K/L` | Focus window (vim-style) |
+| `SUPER + Arrow keys` | Focus window |
 | `SUPER + SHIFT + H/J/K/L` | Move window |
 | `SUPER + CTRL + H/J/K/L` | Resize window (40px) |
 | `SUPER + ALT + H/J/K/L` | Fine resize (10px) |
 | `SUPER + Q` | Close window |
-| `SUPER + V` | Toggle floating |
+| `SUPER + SPACE` | Toggle floating |
 | `SUPER + F` | Toggle fullscreen |
 | `SUPER + P` | Toggle pseudo-tiling |
+| `SUPER + V` | Rotate the current split |
+| `SUPER + SHIFT + V` | Swap the current split's children |
+| `SUPER + grave` | Show or hide the scratchpad |
+| `SUPER + SHIFT + grave` | Send the focused window to the scratchpad |
 
 #### Workspace Management
 
@@ -916,9 +920,10 @@ the whole-display `hyprshade` grayscale shader. Install the Arch package with
 | Keybind | Action |
 |---------|--------|
 | `SUPER + RETURN` | Terminal (kitty) |
-| `SUPER + D` | Application launcher (wofi) |
-| `SUPER + B` | Browser (firefox) |
-| `SUPER + E` | File manager (thunar) |
+| `SUPER + R` | Application launcher (wofi) |
+| `SUPER + D` | Command center dashboard |
+| `SUPER + B` | Browser (Zen) |
+| `SUPER + E` | File manager (Dolphin) |
 
 #### System Controls
 
@@ -1066,16 +1071,33 @@ hyprctl activeworkspace
 
 ## Maintenance
 
+### One-Time Setup
+
+```bash
+# Stateful battery notifications without a permanent polling shell
+bash scripts/setup-battery-notify.sh
+
+# Conservative package-cache and power-policy defaults
+bash scripts/setup-system-maintenance.sh
+
+# Event-driven + 30-minute portal recovery for KDE Connect remote input
+bash scripts/setup-portal-health.sh
+```
+
+The portal health timer and path watcher are managed by the existing user
+systemd instance. They do not create a resident shell process. Verify the
+RemoteDesktop route at any time with `bash scripts/portal-health.sh --check`.
+
 ### Regular Tasks
 
 #### Weekly
 
 ```bash
-# Update system
-sudo pacman -Syu
+# Update official, AUR, and installed Flatpak packages in one transaction
+bash scripts/system-update.sh
 
-# Check for config errors
-hyprctl reload
+# Read-only desktop, package, and portal health sweep
+bash scripts/health-check.sh
 
 # Verify symlinks
 ls -la ~/.config | grep '\->'
@@ -1091,8 +1113,8 @@ rm -rf waybar/bak_*  # Keep only recent backups
 # Update themes
 # Check for theme updates in respective repositories
 
-# Optimize configuration
-# Review and remove unused settings
+# Review reported orphan packages before removing anything
+pacman -Qdt
 ```
 
 ### Backup Strategy
@@ -1100,10 +1122,11 @@ rm -rf waybar/bak_*  # Keep only recent backups
 #### Git-Based Backup
 
 ```bash
-# Commit changes
+# Review and commit only the intended files
 cd ~/.config/hypr
-git add .
-git commit -m "Update: $(date +%Y-%m-%d)"
+git diff
+git add path/to/reviewed-file
+git commit -m "chore: update desktop configuration"
 
 # Push to remote
 git push origin main
