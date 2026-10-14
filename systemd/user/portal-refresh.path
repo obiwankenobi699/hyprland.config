@@ -1,0 +1,11 @@
+[Unit]
+Description=Watch Hyprland portal routing and KDE Connect bridge files
+
+[Path]
+PathChanged=%h/.config/xdg-desktop-portal/hyprland-portals.conf
+PathChanged=/usr/bin/hypr-kdeconnect-portal
+PathChanged=/usr/share/xdg-desktop-portal/portals/hypr-kdeconnect.portal
+Unit=portal-refresh.service
+
+[Install]
+WantedBy=default.target

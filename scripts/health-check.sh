@@ -2,8 +2,8 @@
 # health-check.sh — quick status sweep of the Hyprland desktop.
 #
 # Read-only: it reports, it never changes anything. Covers config validity,
-# the Lua config, autostart daemons, monitor resolutions, the dpms-wake options, and the
-# repo's working-tree state. Run it after a reload or when something feels off.
+# the Lua config, autostart daemons, monitor resolutions, DPMS wake options,
+# package hygiene, and the repo's working-tree state.
 #
 #   ~/.config/hypr/scripts/health-check.sh
 
@@ -16,6 +16,7 @@ pass=0; warn=0; fail=0
 ok()   { printf '  %s✓%s %s\n'  "$gr" "$rs" "$1"; pass=$((pass+1)); }
 wn()   { printf '  %s⚠%s %s\n'  "$ye" "$rs" "$1"; warn=$((warn+1)); }
 bad()  { printf '  %s✗%s %s\n'  "$rd" "$rs" "$1"; fail=$((fail+1)); }
+note() { printf '  %s•%s %s\n'  "$aq" "$rs" "$1"; }
 head() { printf '\n%s%s── %s ──%s\n' "$b" "$or" "$1" "$rs"; }
 
 HYPR="$HOME/.config/hypr"
@@ -49,7 +50,7 @@ check_proc() { # name  pgrep-args...
 check_optional_proc() { # command label pgrep-args...
     local command=$1 label=$2; shift 2
     if ! command -v "$command" >/dev/null 2>&1; then
-        wn "$label — not installed (optional)"
+        note "$label — not installed (optional)"
     elif pgrep "$@" >/dev/null 2>&1; then
         ok "$label"
     else
@@ -59,13 +60,32 @@ check_optional_proc() { # command label pgrep-args...
 check_proc "awww-daemon (wallpaper)" -x awww-daemon
 check_proc "swaync (notifications)" -x swaync
 check_proc "nm-applet (network)"  -x nm-applet
+check_proc "Polkit authentication agent" -f '^/usr/lib/polkit-(gnome/)?polkit-.*authentication-agent-1$'
 check_optional_proc "xsettingsd" "xsettingsd" -x xsettingsd
 check_proc "waybar"               -x waybar
 if pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1; then
     ok "quickshell (overview)"; else bad "quickshell (overview) — not running"; fi
 check_proc "hypridle (idle/lock)" -x hypridle
-if pgrep -f battery_notify.sh >/dev/null 2>&1; then
-    ok "battery-notify poll loop"; else wn "battery-notify poll loop — not running"; fi
+if command -v busctl >/dev/null 2>&1 \
+        && timeout 4s busctl --user introspect \
+            org.freedesktop.portal.Desktop /org/freedesktop/portal/desktop \
+            org.freedesktop.portal.RemoteDesktop 2>/dev/null \
+            | grep -q CreateSession; then
+    ok "KDE Connect RemoteDesktop portal"
+else
+    wn "KDE Connect RemoteDesktop portal unavailable — run scripts/setup-portal-health.sh"
+fi
+if systemctl --user is-active --quiet portal-health.timer 2>/dev/null \
+        && systemctl --user is-active --quiet portal-refresh.path 2>/dev/null; then
+    ok "portal self-healing timer and path"
+else
+    wn "portal self-healing not enabled — run scripts/setup-portal-health.sh"
+fi
+if systemctl --user is-active --quiet battery-notify.timer 2>/dev/null; then
+    ok "battery-notify timer"
+else
+    wn "battery-notify timer — not running; run scripts/setup-battery-notify.sh"
+fi
 
 # ── 3. monitors ───────────────────────────────────────
 head "Monitors"
@@ -102,14 +122,9 @@ if command -v hyprctl >/dev/null; then
         if [ -n "$best" ] && [ -n "$cur" ]; then
             cur_resolution=${cur%@*}
             best_resolution=${best%@*}
-            cur_refresh=${cur#*@}
-            best_refresh=${best#*@}
 
             if [ "$cur_resolution" != "$best_resolution" ]; then
                 wn "$mon running $cur_resolution, best available is $best_resolution"
-            elif awk -v current="$cur_refresh" -v best="$best_refresh" \
-                'BEGIN { exit !(best - current > 0.5) }'; then
-                wn "$mon running ${cur_refresh}Hz, best available is ${best_refresh}Hz"
             fi
         fi
     done < <(hyprctl monitors 2>/dev/null | awk '/^Monitor/{print $2}')
@@ -131,7 +146,94 @@ for opt in mouse_move_enables_dpms key_press_enables_dpms; do
     else wn "misc:$opt = ${v:-unset} — input may not wake the display"; fi
 done
 
-# ── 5. repo state ─────────────────────────────────────
+# ── 5. package hygiene ────────────────────────────────
+head "Packages"
+if command -v pacman >/dev/null 2>&1; then
+    if pacman -Dk >/dev/null 2>&1; then
+        ok "Pacman database integrity"
+    else
+        bad "Pacman database integrity check failed — run: pacman -Dk"
+    fi
+
+    orphan_count=$(pacman -Qdtq 2>/dev/null | awk 'END { print NR + 0 }')
+    foreign_count=$(pacman -Qqm 2>/dev/null | awk 'END { print NR + 0 }')
+    if [ "$orphan_count" -eq 0 ]; then
+        ok "no orphan packages"
+    else
+        wn "$orphan_count orphan package(s) — review with: pacman -Qdt"
+    fi
+    [ "$foreign_count" -eq 0 ] \
+        && note "no foreign/AUR packages" \
+        || note "$foreign_count foreign/AUR package(s) installed — inventory with: pacman -Qm"
+
+    helper_count=0
+    for helper in yay paru; do
+        command -v "$helper" >/dev/null 2>&1 && helper_count=$((helper_count+1))
+    done
+    if [ "$helper_count" -le 1 ]; then
+        ok "one AUR helper installed"
+    else
+        wn "multiple AUR helpers installed — keep one to reduce duplicated caches and workflows"
+    fi
+
+    cache_bytes=$(find /var/cache/pacman/pkg -maxdepth 1 -type f -printf '%s\n' 2>/dev/null \
+        | awk '{ total += $1 } END { print total + 0 }')
+    cache_label=$(numfmt --to=iec-i --suffix=B "$cache_bytes" 2>/dev/null || printf '%s bytes' "$cache_bytes")
+    if [ "$cache_bytes" -gt 5368709120 ] && ! systemctl is-enabled --quiet paccache.timer 2>/dev/null; then
+        wn "Pacman cache is $cache_label — enable paccache.timer or prune retained versions"
+    elif [ "$cache_bytes" -gt 5368709120 ]; then
+        note "Pacman cache is $cache_label with automatic pruning enabled"
+    else
+        ok "Pacman cache is $cache_label"
+    fi
+
+    if systemctl is-enabled --quiet paccache.timer 2>/dev/null; then
+        ok "paccache.timer enabled"
+    else
+        wn "paccache.timer disabled — package cache will grow indefinitely"
+    fi
+
+    active_policy=""
+    enabled_policy=""
+    for service in power-profiles-daemon auto-cpufreq tlp; do
+        systemctl is-active --quiet "$service" 2>/dev/null && active_policy="$active_policy $service"
+        systemctl is-enabled --quiet "$service" 2>/dev/null && enabled_policy="$enabled_policy $service"
+    done
+    active_count=$(awk '{ print NF }' <<< "$active_policy")
+    enabled_count=$(awk '{ print NF }' <<< "$enabled_policy")
+    if [ "$active_count" -eq 1 ]; then
+        ok "one active CPU power-policy service:$active_policy"
+    elif [ "$active_count" -eq 0 ]; then
+        wn "no active CPU power-policy service"
+    else
+        bad "multiple active CPU power-policy services:$active_policy"
+    fi
+    [ "$enabled_count" -le 1 ] \
+        || wn "multiple CPU power-policy services enabled:$enabled_policy"
+else
+    wn "Pacman not found — skipped package checks"
+fi
+
+if ! command -v flatpak >/dev/null 2>&1 && [ -d /var/lib/flatpak ]; then
+    flatpak_bytes=$(du -sb /var/lib/flatpak 2>/dev/null | awk '{ print $1 }')
+    flatpak_label=$(numfmt --to=iec-i --suffix=B "${flatpak_bytes:-0}" 2>/dev/null || printf '%s bytes' "${flatpak_bytes:-0}")
+    wn "Flatpak is not installed but $flatpak_label of system Flatpak data remains"
+elif command -v flatpak >/dev/null 2>&1; then
+    ok "Flatpak installed; unified updater will include it"
+else
+    note "Flatpak not installed; unified updater will skip it"
+fi
+
+root_usage=$(df -P / | awk 'NR == 2 { gsub(/%/, "", $5); print $5 }')
+if [ "${root_usage:-100}" -ge 90 ]; then
+    bad "root filesystem is ${root_usage}% full"
+elif [ "${root_usage:-100}" -ge 80 ]; then
+    wn "root filesystem is ${root_usage}% full"
+else
+    ok "root filesystem is ${root_usage}% full"
+fi
+
+# ── 6. repo state ─────────────────────────────────────
 head "Repo ($HYPR)"
 if git -C "$HYPR" rev-parse >/dev/null 2>&1; then
     dirty=$(git -C "$HYPR" status --porcelain | wc -l)

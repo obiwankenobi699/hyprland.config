@@ -1,0 +1,15 @@
+[Unit]
+Description=Check and repair Hyprland desktop portals
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/hypr/scripts/portal-health.sh --repair
+TimeoutStartSec=20s
+Nice=10
+IOSchedulingClass=idle
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only

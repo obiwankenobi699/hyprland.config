@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodically verify Hyprland desktop portals
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=30min
+RandomizedDelaySec=2min
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target

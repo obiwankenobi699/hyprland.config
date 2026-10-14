@@ -1,0 +1,11 @@
+[Unit]
+Description=Send stateful low-battery notifications
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/hypr/scripts/battery_notify.sh
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/state/hypr
