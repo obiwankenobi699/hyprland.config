@@ -1,20 +1,33 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 32,
-    "margin-top": 4,
-    "margin-left": 12,
-    "margin-right": 12,
-    "modules-left": ["hyprland/workspaces", "hyprland/submap"],
-    "modules-center": ["clock"],
-    "modules-right": ["custom/updates", "custom/fanmax", "custom/notification", "custom/powerprofile", "pulseaudio", "battery", "network", "tray", "custom/power"],
+    "height": 30,
+    "margin-top": 6,
+    "margin-left": 16,
+    "margin-right": 16,
+    "modules-left": ["custom/dashboard", "hyprland/workspaces", "hyprland/submap"],
+    "modules-center": ["custom/shell"],
+    "modules-right": ["clock", "custom/updates", "custom/fanmax", "custom/notification", "custom/powerprofile", "pulseaudio", "battery", "network", "tray", "custom/power"],
+
+    "custom/dashboard": {
+        "format": "󰣇",
+        "tooltip": false,
+        "on-click": "qs ipc call dashboard toggle"
+    },
+
+    "custom/shell": {
+        "format": "󰆍  │  ~",
+        "tooltip": false,
+        "on-click": "kitty"
+    },
 
     "custom/updates": {
         "return-type": "json",
         "exec": "~/.config/hypr/scripts/update-status.sh",
         "interval": 3600,
+        "signal": 10,
         "tooltip": true,
-        "on-click": "kitty -e yay -Syu"
+        "on-click": "kitty --class system-maintenance -e ~/.config/hypr/scripts/system-update.sh"
     },
 
     "custom/power": {
@@ -46,9 +59,9 @@
         "all-outputs": true,
         "format": "{icon}",
         "format-icons": {
-            "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
-            "6": "6", "7": "7", "8": "8", "9": "9", "10": "0",
-            "urgent": "", "focused": "", "default": ""
+            "1": "●", "2": "●", "3": "●", "4": "●", "5": "●",
+            "6": "●", "7": "●", "8": "●", "9": "●", "10": "●",
+            "urgent": "●", "focused": "●", "default": "●"
         }
     },
 
@@ -60,7 +73,7 @@
 
     "clock": {
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format": "{:%Y-%m-%d %H:%M}"
+        "format": "{:%I:%M %p}"
     },
 
     "cpu": {
@@ -81,17 +94,18 @@
     },
 
     "network": {
-        "format-wifi": " {signalStrength}%",
-        "format-ethernet": " connected",
-        "tooltip-format": "{ifname} via {gwaddr}",
-        "format-linked": "{ifname} (No IP)",
-        "format-disconnected": "⚠ Disconnected",
+        "format-wifi": "󰖩",
+        "format-ethernet": "󰈀",
+        "tooltip-format-wifi": "{essid} · {signalStrength}% · {ipaddr}",
+        "tooltip-format-ethernet": "{ifname} · {ipaddr}",
+        "format-linked": "󰈀",
+        "format-disconnected": "󰖪",
         "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
 
     "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-bluetooth": "{icon} {volume}% ",
+        "format": "{icon}",
+        "format-bluetooth": "{icon}",
         "format-bluetooth-muted": " {icon}",
         "format-muted": " {format_source}",
         "format-source": " {volume}%",
@@ -105,7 +119,9 @@
             "car": "",
             "default": ["", "", ""]
         },
-        "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+        "tooltip-format": "Volume {volume}%",
+        "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+        "on-click-right": "pavucontrol"
     },
 
     "tray": { "spacing": 10 },
