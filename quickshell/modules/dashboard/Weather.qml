@@ -6,6 +6,7 @@ import "."
 Item {
     id: w
     implicitHeight: 56
+    property bool active: true
 
     property string temp: "—"
     property string desc: "loading…"
@@ -24,7 +25,7 @@ Item {
         }
     }
     // refresh every 15 min (weather changes slowly)
-    Timer { interval: 900000; running: true; repeat: true; triggeredOnStart: true; onTriggered: proc.running = true }
+    Timer { interval: 900000; running: w.active; repeat: true; triggeredOnStart: true; onTriggered: proc.running = true }
 
     function glyph(d) {
         d = (d || "").toLowerCase();

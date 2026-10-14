@@ -13,5 +13,9 @@ QtObject {
     readonly property color aqua:   "#83a598"
     readonly property color red:    "#fb4934"
     readonly property color yellow: "#fabd2f"
+    readonly property color surface: "#232526"
+    readonly property color surfaceRaised: "#2d2f30"
+    readonly property color border: "#504945"
+    readonly property color focus: "#fabd2f"
     readonly property string font:  "JetBrainsMono Nerd Font"
 }

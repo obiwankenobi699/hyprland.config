@@ -1,11 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell.Io
 import "."
 
 Item {
     id: sp
     implicitHeight: col.implicitHeight
+    property bool active: true
 
     property int cpu: 0
     property int ram: 0
@@ -53,7 +55,7 @@ Item {
 
     Timer {
         interval: 2000
-        running: true
+        running: sp.active
         repeat: true
         triggeredOnStart: true
         onTriggered: proc.running = true
@@ -79,16 +81,25 @@ Item {
             MiniStat { icon: "󰁹"; value: sp.batt + "%"; accent: Theme.yellow }
             Item { Layout.fillWidth: true }
             MiniStat { icon: "󰅐"; value: sp.up; accent: Theme.green }
-            Text {
+            Button {
+                id: healthButton
                 text: "HEALTH  ›"
-                color: Theme.orange
-                font.family: Theme.font
-                font.pixelSize: 9
-                font.bold: true
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: sp.requestDiagnostics()
+                focusPolicy: Qt.StrongFocus
+                onClicked: sp.requestDiagnostics()
+                background: Rectangle {
+                    color: "transparent"
+                    border.width: healthButton.activeFocus ? 1 : 0
+                    border.color: Theme.orange
+                    radius: 4
+                }
+                contentItem: Text {
+                    text: healthButton.text
+                    color: Theme.orange
+                    font.family: Theme.font
+                    font.pixelSize: 9
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                 }
             }
         }

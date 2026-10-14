@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import "."
@@ -7,6 +8,7 @@ import "."
 Item {
     id: np
     implicitHeight: 60
+    property bool active: true
 
     property string status: ""
     property string artist: ""
@@ -16,21 +18,21 @@ Item {
 
     Process {
         id: proc
-        command: ["bash", "-lc", "playerctl metadata --format '{{status}}|{{artist}}|{{title}}|{{mpris:artUrl}}' 2>/dev/null"]
+        command: ["bash", "-lc", "playerctl metadata --format '{{status}}\\t{{artist}}\\t{{title}}\\t{{mpris:artUrl}}' 2>/dev/null"]
         stdout: StdioCollector {
             id: c
             onStreamFinished: {
                 const t = c.text.trim();
                 if (t.length === 0) { np.status = ""; np.artist = ""; np.title = ""; np.artUrl = ""; }
                 else {
-                    const p = t.split("|");
+                    const p = t.split("\t");
                     np.status = p[0] || ""; np.artist = p[1] || "";
                     np.title = p[2] || ""; np.artUrl = p[3] || "";
                 }
             }
         }
     }
-    Timer { interval: 1000; running: true; repeat: true; triggeredOnStart: true; onTriggered: proc.running = true }
+    Timer { interval: 1000; running: np.active; repeat: true; triggeredOnStart: true; onTriggered: proc.running = true }
 
     function ctl(cmd) { Quickshell.execDetached(["bash", "-lc", "playerctl " + cmd]); }
 
@@ -76,9 +78,9 @@ Item {
                     font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true
                 }
             }
-            MediaBtn { icon: "󰒮"; onClicked: np.ctl("previous") }
-            MediaBtn { icon: np.status === "Playing" ? "󰏤" : "󰐊"; onClicked: np.ctl("play-pause") }
-            MediaBtn { icon: "󰒭"; onClicked: np.ctl("next") }
+            MediaBtn { glyph: "󰒮"; label: "Previous"; onClicked: np.ctl("previous") }
+            MediaBtn { glyph: np.status === "Playing" ? "󰏤" : "󰐊"; label: np.status === "Playing" ? "Pause" : "Play"; onClicked: np.ctl("play-pause") }
+            MediaBtn { glyph: "󰒭"; label: "Next"; onClicked: np.ctl("next") }
         }
     }
 
@@ -95,15 +97,27 @@ Item {
         }
     }
 
-    component MediaBtn: Rectangle {
-        property string icon: ""
-        signal clicked()
-        implicitWidth: 34; implicitHeight: 34; radius: 17
-        color: mma.containsMouse ? Theme.bg3 : "transparent"
-        Text { anchors.centerIn: parent; text: icon; color: Theme.fg; font.family: Theme.font; font.pixelSize: 17 }
-        MouseArea {
-            id: mma; anchors.fill: parent; hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor; onClicked: parent.clicked()
+    component MediaBtn: Button {
+        id: mediaButton
+        property string glyph: ""
+        property string label: ""
+        text: label
+        implicitWidth: 34
+        implicitHeight: 34
+        focusPolicy: Qt.StrongFocus
+        background: Rectangle {
+            radius: 17
+            color: parent.down || parent.hovered ? Theme.bg3 : "transparent"
+            border.width: parent.activeFocus ? 2 : 0
+            border.color: Theme.orange
+        }
+        contentItem: Text {
+            text: mediaButton.glyph
+            color: Theme.fg
+            font.family: Theme.font
+            font.pixelSize: 17
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
         }
     }
 }

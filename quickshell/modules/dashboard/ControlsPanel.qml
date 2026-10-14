@@ -8,44 +8,43 @@ import "."
 Item {
     id: cp
     implicitHeight: col.implicitHeight
+    property bool active: true
     signal requestClose()
 
     function act(cmd) { Quickshell.execDetached(["bash", "-lc", cmd]); }
 
     // toggle button (icon + label in a rounded square)
-    component ToggleBtn: Rectangle {
-        property string icon: ""
+    component ToggleBtn: Button {
+        id: toggleButton
+        property string glyph: ""
         property string label: ""
         property color accent: Theme.aqua
-        signal clicked()
+        text: label
         Layout.fillWidth: true
         implicitHeight: 72
-        radius: 12
-        color: ma.containsMouse ? Theme.bg3 : Theme.bg2
-        ColumnLayout {
-            anchors.centerIn: parent
+        focusPolicy: Qt.StrongFocus
+        background: Rectangle {
+            radius: 12
+            color: parent.down || parent.hovered ? Theme.bg3 : Theme.bg2
+            border.width: parent.activeFocus ? 2 : 0
+            border.color: Theme.orange
+        }
+        contentItem: ColumnLayout {
             spacing: 5
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: icon
-                color: accent
+                text: toggleButton.glyph
+                color: toggleButton.accent
                 font.family: Theme.font
                 font.pixelSize: 26
             }
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: label
+                text: toggleButton.label
                 color: Theme.gray
                 font.family: Theme.font
                 font.pixelSize: 10
             }
-        }
-        MouseArea {
-            id: ma
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: parent.clicked()
         }
     }
 
@@ -57,15 +56,15 @@ Item {
         // ── Quick toggles ──
         GridLayout {
             Layout.fillWidth: true
-            columns: 3
+            columns: cp.width < 330 ? 2 : 3
             columnSpacing: 10
             rowSpacing: 10
-            ToggleBtn { icon: "󰖩"; label: "Wifi";  accent: Theme.aqua;   onClicked: cp.act('[ "$(nmcli radio wifi)" = enabled ] && nmcli radio wifi off || nmcli radio wifi on') }
-            ToggleBtn { icon: "󰂯"; label: "BT";    accent: Theme.aqua;   onClicked: cp.act('bluetoothctl show | grep -q "Powered: yes" && bluetoothctl power off || bluetoothctl power on') }
-            ToggleBtn { icon: "󰓅"; label: "Perf";  accent: Theme.orange; onClicked: cp.act("~/.config/hypr/scripts/toggle-profile.sh") }
-            ToggleBtn { icon: "󰈐"; label: "Fan";   accent: Theme.red;    onClicked: cp.act("~/.config/hypr/scripts/fan-max.sh") }
-            ToggleBtn { icon: "󰌾"; label: "Lock";  accent: Theme.green;  onClicked: { cp.act("hyprlock"); cp.requestClose(); } }
-            ToggleBtn { icon: "󰍃"; label: "Exit";  accent: Theme.yellow; onClicked: { cp.act("wlogout"); cp.requestClose(); } }
+            ToggleBtn { glyph: "󰖩"; label: "Wifi";  accent: Theme.aqua;   onClicked: cp.act('[ "$(nmcli radio wifi)" = enabled ] && nmcli radio wifi off || nmcli radio wifi on') }
+            ToggleBtn { glyph: "󰂯"; label: "Bluetooth"; accent: Theme.aqua; onClicked: cp.act('bluetoothctl show | grep -q "Powered: yes" && bluetoothctl power off || bluetoothctl power on') }
+            ToggleBtn { glyph: "󰓅"; label: "Performance"; accent: Theme.orange; onClicked: cp.act("~/.config/hypr/scripts/toggle-profile.sh") }
+            ToggleBtn { glyph: "󰈐"; label: "Fan";   accent: Theme.red;    onClicked: cp.act("~/.config/hypr/scripts/fan-max.sh") }
+            ToggleBtn { glyph: "󰌾"; label: "Lock";  accent: Theme.green;  onClicked: { cp.act("hyprlock"); cp.requestClose(); } }
+            ToggleBtn { glyph: "󰍃"; label: "Session"; accent: Theme.yellow; onClicked: { cp.act("wlogout"); cp.requestClose(); } }
         }
 
         // ── Volume slider ──
@@ -98,7 +97,7 @@ Item {
 
         Timer {
             interval: 1500
-            running: true
+            running: cp.active
             repeat: true
             triggeredOnStart: true
             onTriggered: { volRead.running = true; brightRead.running = true; }
